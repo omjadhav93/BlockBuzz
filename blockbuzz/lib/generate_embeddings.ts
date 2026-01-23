@@ -1,5 +1,5 @@
-import { prisma } from "@/prisma/db";
-import { getEmbedding } from "@/lib/embeddings";
+import { prisma } from "../prisma/db.js";
+import { getEmbedding } from "./embeddings.js";
 
 async function run() {
     // Using raw SQL because Prisma doesn't support filtering on Unsupported types
@@ -34,9 +34,12 @@ async function run() {
 
         const embedding = await getEmbedding(text);
 
+        // Format embedding as PostgreSQL array: [0.1,0.2,0.3]
+        const embeddingStr = `[${embedding.join(',')}]`;
+
         await prisma.$executeRaw`
       UPDATE "Event"
-      SET embedding = ${embedding}::vector
+      SET embedding = ${embeddingStr}::vector
       WHERE id = ${event.id};
     `;
 
