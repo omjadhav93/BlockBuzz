@@ -13,6 +13,8 @@ import {
     Loader2,
     Ticket,
     HandHelping,
+    Info,
+    QrCode,
     X // Added X for closing the list
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -39,6 +41,8 @@ export default function EventDetailPage() {
     // State to toggle Volunteer List visibility
     const [showVolunteers, setShowVolunteers] = useState(false);
     const [showPendingVolunteers, setShowPendingVolunteers] = useState(false);
+    const [showTicketModal, setShowTicketModal] = useState(false);
+    const [loadingRegister, setLoadingRegister] = useState(false)
 
 
     const { data, isLoading } = useSWR(
@@ -48,15 +52,20 @@ export default function EventDetailPage() {
 
     const event = data?.data;
 
-    const { data: VolunteerData, isLoading: VolunteerLoading } = useSWR(
-        `/api/organizer/event/applications?eventId=${eventId}`,
-        fetcher
-    );
+    let VolunteerData;
+    let VolunteerLoading;
+    if (role === "Organizer") {
+        const { data: VolunteerData, isLoading: VolunteerLoading } = useSWR(
+            `/api/organizer/event/applications?eventId=${eventId}`,
+            fetcher
+        );
+    }
 
-    const volunteerData = VolunteerData?.applications.accepted;
-    const pendingVolunteerData = VolunteerData?.applications.pending;
 
-    const isPageLoading = isLoading || VolunteerLoading;
+    const volunteerData = VolunteerData?.applications.accepted || [];
+    const pendingVolunteerData = VolunteerData?.applications.pending || [];
+
+    const isPageLoading = isLoading || (role === "Organizer" && VolunteerLoading);
 
     if (isPageLoading) {
         return (
@@ -85,6 +94,32 @@ export default function EventDetailPage() {
                 alert("Error in adding volunteer", result.error);
             } else {
                 alert("Volunteer added successfully");
+                router.refresh();
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const handleRegisterToVolunteer = async () => {
+        try {
+            const res = await fetch(`/api/event/register`, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    eventId
+                })
+            })
+
+            const result = await res.json();
+            if (!result.success) {
+                alert("Error in registering to event", result.error);
+            } else {
+                alert("Registered successfully");
+                router.refresh();
             }
         } catch (error) {
             console.log(error);
@@ -119,7 +154,7 @@ export default function EventDetailPage() {
                 <section className="mb-8">
                     <div className="flex items-center gap-2 mb-3">
                         <span className="bg-[#EF835D]/10 text-[#EF835D] text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md">
-                            {event.interests?.[0] || "Event"}
+                            {event?.interests?.[0] || "Event"}
                         </span>
                         <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-green-500">
                             <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />
@@ -318,10 +353,107 @@ export default function EventDetailPage() {
             {/* Sticky CTA */}
             <div className="fixed bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-xl border-t border-slate-100 z-50">
                 {/* {role === "Organizer" && <PrimaryBtn icon={<BarChart3 />} text="View Attendee Analytics" />} */}
-                {role === "User" && <PrimaryBtn icon={<Ticket />} text="View Ticket" />}
+                {role === "User" && event.registered ? <PrimaryBtn onClick={() => setShowTicketModal(true)} icon={<Ticket />} text="View Ticket" /> : <PrimaryBtn onClick={handleRegisterToVolunteer} icon={<HandHelping />} text={loadingRegister ? "Registering..." : "Register Now"} />}
                 {role === "Volunteer" && <PrimaryBtn icon={<HandHelping />} text="View Assignment" />}
-                {role === "NONE" && <PrimaryBtn text="Register Now" />}
             </div>
+
+            {showTicketModal && (
+                <div className="fixed inset-0 z-[100] flex flex-col items-center justify-end sm:justify-center animate-in fade-in duration-300">
+                    {/* Backdrop - darker for better ticket contrast */}
+                    <div
+                        className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
+                        onClick={() => setShowTicketModal(false)}
+                    />
+
+                    <div className="relative w-full max-w-sm px-4 pb-8 sm:pb-0 animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-500">
+
+                        {/* TICKET CARD */}
+                        <div className="relative bg-white rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden">
+
+                            {/* TOP: Event Header */}
+                            <div className="pt-10 px-8 pb-6 text-center">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-50 border border-slate-100 mb-4">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-[#EF835D] animate-pulse" />
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Verified Entry</span>
+                                </div>
+                                <h2 className="text-2xl font-black text-slate-900 leading-tight tracking-tight">
+                                    {event.title}
+                                </h2>
+                                <div className="flex items-center justify-center gap-4 mt-3">
+                                    <div className="text-center">
+                                        <p className="text-[9px] font-black text-slate-400 uppercase">Date</p>
+                                        <p className="text-xs font-bold text-slate-700">
+                                            {new Date(event.startTime).toLocaleString("en-IN", {
+                                                day: "numeric",
+                                                month: "short",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}
+                                        </p>
+
+                                    </div>
+                                    <div className="w-px h-6 bg-slate-100" />
+                                    <div className="text-center">
+                                        <p className="text-[9px] font-black text-slate-400 uppercase">Location</p>
+                                        <p className="text-xs font-bold text-slate-700">{event.city}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* THE "TEAR" LINE (Visual Perforation) */}
+                            <div className="relative flex items-center py-2">
+                                <div className="absolute left-[-12px] w-6 h-6 bg-slate-950 rounded-full" />
+                                <div className="absolute right-[-12px] w-6 h-6 bg-slate-950 rounded-full" />
+                                <div className="w-full border-t-2 border-dashed border-slate-100" />
+                            </div>
+
+                            {/* MIDDLE: High-Brightness QR Area */}
+                            <div className="px-8 py-8 flex flex-col items-center justify-center bg-white">
+                                <div className="relative group">
+                                    {/* QR Glow Effect */}
+                                    <div className="absolute inset-0 bg-[#EF835D]/10 blur-2xl rounded-full group-hover:bg-[#EF835D]/20 transition-all" />
+
+                                    <div className="relative p-5 bg-white rounded-[2.5rem] shadow-[0_10px_30px_rgba(0,0,0,0.05)] border border-slate-50">
+                                        <div className="w-48 h-48 flex items-center justify-center relative">
+                                            <QrCode size={160} className="text-slate-900" strokeWidth={1} />
+                                            {/* Scanning Laser Line */}
+                                            <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#EF835D] shadow-[0_0_15px_#EF835D] animate-scan" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-6 flex flex-col items-center">
+                                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em] mb-1">Access Code</p>
+                                    <div className="px-4 py-1.5 bg-slate-50 rounded-full border border-slate-100">
+                                        <code className="text-xs font-black text-slate-600 tracking-widest">
+                                            {event.id?.slice(-8).toUpperCase() || "X-992-B2"}
+                                        </code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* BOTTOM: Attendee Brief */}
+                            <div className="px-8 pb-10">
+                                {/* Quick Action Button for Mobile */}
+                                <button
+                                    onClick={() => setShowTicketModal(false)}
+                                    className="w-full mt-6 h-16 rounded-[1.5rem] bg-slate-900 active:bg-slate-800 text-white font-black uppercase tracking-widest text-xs shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                >
+                                    Done
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Footer Tip */}
+                        <div className="mt-6 flex items-center justify-center gap-2 text-white/50 animate-pulse">
+                            <Info size={14} />
+                            <p className="text-[10px] font-bold uppercase tracking-widest">
+                                Screenshot this for offline use
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
@@ -361,9 +493,9 @@ function ControlBtn({ icon, label, onClick }: { icon: React.ReactNode; label: st
     );
 }
 
-function PrimaryBtn({ text, icon }: { text: string; icon?: React.ReactNode }) {
+function PrimaryBtn({ text, icon, onClick }: { text: string; icon?: React.ReactNode; onClick?: () => void }) {
     return (
-        <button className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl flex items-center justify-center gap-3">
+        <button onClick={onClick} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl flex items-center justify-center gap-3">
             {text} {icon}
         </button>
     );
