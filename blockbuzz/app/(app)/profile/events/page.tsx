@@ -51,20 +51,20 @@ const fetcher = async (url: string): Promise<EventResponse> => {
 
 export default function EventPage() {
     const router = useRouter();
-    // const { data, isLoading, error } = useSWR("/api/user/events", fetcher);
+    const { data, isLoading, error } = useSWR("/api/user/events", fetcher);
 
-    const data = mockEventResponse;
+    // const data = mockEventResponse;
     const upcomingEvents = data?.events?.Upcoming || [];
     const pastEvents = data?.events?.Attended || [];
 
-    // if (isLoading) {
-    //     return (
-    //         <div className="min-h-screen flex flex-col items-center justify-center bg-[#FCFBFA]">
-    //             <Loader2 className="w-8 h-8 animate-spin text-[#EF835D] mb-2" />
-    //             <p className="text-slate-400 text-sm font-medium">Loading events...</p>
-    //         </div>
-    //     );
-    // }
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-[#FCFBFA]">
+                <Loader2 className="w-8 h-8 animate-spin text-[#EF835D] mb-2" />
+                <p className="text-slate-400 text-sm font-medium">Loading events...</p>
+            </div>
+        );
+    }
 
     // if (error) {
     //     return (
