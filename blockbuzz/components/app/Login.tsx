@@ -7,13 +7,13 @@ import { Eye, EyeOff, MapPin, Mail, User, Lock, Loader2 } from "lucide-react";
 import { loginSchema } from "@/lib/validation/login-schema";
 import { z } from "zod";
 import { useRouter } from 'next/navigation';
-// import { useUserStore } from "@/app/store/user.store";
+import { useUserStore } from "@/app/store/user.store";
 
 type LoginInput = z.infer<typeof loginSchema>;
 
 export default function Login() {
     const router = useRouter();
-    // const setUserData = useUserStore((state) => state.setUser);
+    const setUserData = useUserStore((state) => state.setUser);
 
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false)
@@ -48,7 +48,7 @@ export default function Login() {
             const data = await response.json();
             console.log("data from login", data)
             if (data.success) {
-                // setUserData(data.user);
+                setUserData(data.user);
                 router.push("/homepage");
             }
         } catch (error) {

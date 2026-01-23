@@ -7,13 +7,13 @@ import { Eye, EyeOff, MapPin, Mail, User2, Lock, Loader2 } from "lucide-react";
 import { registerSchema } from "@/lib/validation/register-schema";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-// import { useUserStore, User } from "@/app/store/user.store";
+import { useUserStore, User } from "@/app/store/user.store";
 
 type RegisterInput = z.infer<typeof registerSchema>;
 
 export default function Register() {
     const router = useRouter()
-    // const setUser = useUserStore((state) => state.setUser);
+    const setUser = useUserStore((state) => state.setUser);
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false)
     const [userData, setUserData] = useState<RegisterInput>({
@@ -27,42 +27,40 @@ export default function Register() {
         Partial<Record<keyof RegisterInput, string[]>>
     >({});
 
-    // const { setUser } = useUserStore()
-
     const handleRegister = async () => {
         setLoading(true);
-        // const result = registerSchema.safeParse(userData);
+        const result = registerSchema.safeParse(userData);
 
-        // if (!result.success) {
-        //     setErrors(result.error.flatten().fieldErrors);
-        //     return;
-        // }
+        if (!result.success) {
+            setErrors(result.error.flatten().fieldErrors);
+            return;
+        }
 
-        // try {
-        //     const response = await fetch("/api/auth/register", {
-        //         method: "POST",
-        //         headers: {
-        //             contentTypes: "application/json",
-        //         },
-        //         body: JSON.stringify(userData)
-        //     })
+        try {
+            const response = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: {
+                    contentTypes: "application/json",
+                },
+                body: JSON.stringify(userData)
+            })
 
-        //     const data = await response.json();
-        //     if (data.success) {
-        //         setUserData(data.user);
-        //         router.push("/add-interest")
-        //     }
-        // } catch (error) {
-        //     console.log(error)
-        // } finally {
-        //     setLoading(false);
-        //     setUserData({
-        //         name: "",
-        //         email: "",
-        //         password: "",
-        //         location: "",
-        //     })
-        // }
+            const data = await response.json();
+            if (data.success) {
+                setUserData(data.user);
+                router.push("/add-interest")
+            }
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setLoading(false);
+            setUserData({
+                name: "",
+                email: "",
+                password: "",
+                location: "",
+            })
+        }
     };
 
     return (
