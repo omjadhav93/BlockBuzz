@@ -32,7 +32,10 @@ def user_interest():
         email = user["email"]
         interest = user["interests"]
         user_cookies = cookies_data.get(email)
+<<<<<<< HEAD
         print(f"[Interest Added] User: {email} | Interests: {interest}")
+=======
+>>>>>>> 26ab921 (user intrest script)
         if not user_cookies:
             print(f"[SKIP] No cookies found for user {email}")
             continue
