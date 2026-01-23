@@ -155,6 +155,8 @@ export async function POST(request: NextRequest) {
                 ${interests.join(", ")}
                 `;
             const embedding = await getEmbedding(text);
+            // Format embedding as PostgreSQL array: [0.1,0.2,0.3]
+            const embeddingStr = `[${embedding.join(',')}]`;
 
             // Update the event with all details and set published to true
             const publishedEvent = await prisma.$transaction(async (tx) => {
@@ -185,7 +187,7 @@ export async function POST(request: NextRequest) {
                 // Update embedding separately using raw SQL (Prisma doesn't support Unsupported types in TypeScript)
                 await tx.$executeRaw`
                     UPDATE "Event" 
-                    SET embedding = ${embedding}::vector 
+                    SET embedding = ${embeddingStr}::vector 
                     WHERE id = ${event.id}
                 `;
 
@@ -293,6 +295,8 @@ export async function POST(request: NextRequest) {
                 ${interests.join(", ")}
                 `;
             const embedding = await getEmbedding(text);
+            // Format embedding as PostgreSQL array: [0.1,0.2,0.3]
+            const embeddingStr = `[${embedding.join(',')}]`;
 
             const newEvent = await prisma.$transaction(async (tx) => {
                 // Create event with interests
@@ -321,7 +325,7 @@ export async function POST(request: NextRequest) {
                 // Update embedding separately using raw SQL (Prisma doesn't support Unsupported types in TypeScript)
                 await tx.$executeRaw`
                     UPDATE "Event" 
-                    SET embedding = ${embedding}::vector 
+                    SET embedding = ${embeddingStr}::vector 
                     WHERE id = ${event.id}
                 `;
 
