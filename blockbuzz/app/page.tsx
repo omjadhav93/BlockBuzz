@@ -1,28 +1,28 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Sparkles } from "lucide-react";
-// import { useUserStore } from "./store/user.store";
+import { useUserStore } from "./store/user.store";
 import { useRouter } from "next/navigation";
 
 export default function LoadingScreen() {
-  // const { user, isHydrated } = useUserStore()
+  const { user, isHydrated } = useUserStore()
   const router = useRouter();
   const [showDots, setShowDots] = useState(false);
 
-  // useEffect(() => {
-  // if (!isHydrated) return;
+  useEffect(() => {
+    if (!isHydrated) return;
 
-  const dotsTimer = setTimeout(() => {
-    setShowDots(true);
-    router.replace("/onboarding")
-  }, 1500);
+    const dotsTimer = setTimeout(() => {
+      setShowDots(true);
+    }, 2000);
 
-  // if (user) {
-  //     router.replace("/homepage")
-  //   } else {
-  //     router.replace("/onboarding")
-  //   }
-  // }, [user, isHydrated, router]);
+    if (user) {
+      router.replace("/homepage")
+    } else {
+      router.replace("/onboarding")
+    }
+    clearTimeout(dotsTimer);
+  }, [user, isHydrated, router]);
 
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center bg-white">
