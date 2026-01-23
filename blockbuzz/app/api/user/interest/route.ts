@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/prisma/db";
 import { getAuthUser } from "@/lib/auth";
+import { int } from "zod";
 
 export async function GET(request: NextRequest) {
     try {
@@ -38,9 +39,9 @@ export async function PATCH(request: NextRequest) {
     try {
         const { error, userId } = await getAuthUser(request);
         if (error) return error;
-
+        
         const { interests } = await request.json();
-        console.log("interest from backend", interests)
+        console.log("interests:", interests);
 
         // Validate that interests is an array
         if (!Array.isArray(interests)) {
