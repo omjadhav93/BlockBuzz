@@ -58,7 +58,6 @@ const eventPublishSchema = z.object({
             other_role: z.string().min(2, { message: "Other role must be at least 2 characters" }).optional().nullable(),
             requiredCount: z.number().int({ message: "Required count must be an integer" }).positive({ message: "Required count must be a positive number" }),
             skills: z.array(z.string().min(1, { message: "Skill must not be empty" })).optional().default([]),
-            description: z.string().min(5, { message: "Description must be at least 5 characters" }).optional().nullable(),
         }))
         .default([]),
 })
@@ -205,7 +204,7 @@ export async function POST(request: NextRequest) {
                             other_role: req.other_role,
                             requiredCount: req.requiredCount,
                             skills: req.skills,
-                            description: req.description,
+                            // description: req.description,
                         },
                         create: {
                             eventId: event.id,
@@ -213,7 +212,7 @@ export async function POST(request: NextRequest) {
                             other_role: req.other_role,
                             requiredCount: req.requiredCount,
                             skills: req.skills,
-                            description: req.description,
+                            // description: req.description,
                         }
                     });
                 }
@@ -338,7 +337,7 @@ export async function POST(request: NextRequest) {
                             other_role: req.other_role,
                             requiredCount: req.requiredCount,
                             skills: req.skills,
-                            description: req.description,
+                            // description: req.description,
                         },
                     });
                 }
