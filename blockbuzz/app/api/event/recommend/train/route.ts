@@ -22,6 +22,7 @@ export async function GET() {
 
         const storageDir = path.join(
             process.cwd(),
+            "../",
             "recommendation_system",
             "storage"
         );
@@ -37,6 +38,7 @@ export async function GET() {
         // 2. Python working directory
         const scriptDir = path.join(
             process.cwd(),
+            "../",
             "recommendation_system"
         );
 

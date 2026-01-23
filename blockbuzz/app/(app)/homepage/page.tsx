@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import useSWR from "swr";
 import BottomNavbar from "@/components/app/BottomNavbar";
-import { Bell, Search, MapPin, SparklesIcon } from "lucide-react";
+import { Bell, Search, MapPin, SparklesIcon, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import EventCard from "@/components/app/EventCard";
 import { getGreeting } from "@/lib/greet";
@@ -25,11 +25,42 @@ export default function HomePage() {
     const user = useUserStore((state) => state.user);
     const { data } = useSWR(`/api/event/nearby?lat=${center.lat}&long=${center.lng}&radius=${radius}`, fetcher);
     const events: Event[] = data?.events || mockEvents;
+    const [recommendations, setRecommendations] = useState<Event[]>([]);
+    const [recommendLoading, setRecommendLoading] = useState<boolean>(false);
 
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         if (!loadMoreRef.current) return;
+
+        const getRecommandations = async () => {
+            try {
+                setRecommendLoading(true);
+                const response = await fetch("/api/event/recommend", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        size: 10,
+                        latitude: center.lat,
+                        longitude: center.lng
+                    })
+                });
+                const data = await response.json();
+                console.log("Recommendations:", data);
+                if (data.events) {
+                    setRecommendations(data.events);
+                }
+            } catch (error) {
+                console.error("Error fetching recommendations:", error);
+            } finally {
+                setRecommendLoading(false);
+            }
+        }
+
+        getRecommandations();
 
         const observer = new IntersectionObserver(
             (entries) => {
@@ -47,8 +78,15 @@ export default function HomePage() {
         observer.observe(loadMoreRef.current);
 
         return () => observer.disconnect();
-    }, [events]);
+    }, [events, center.lat, center.lng]);
 
+    if (recommendLoading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <Loader2 className="h-4 w-4 animate-spin" />
+            </div>
+        )
+    }
 
     return (
         <div className="min-w-screen h-screen p-4 space-y-4 overflow-y-scroll">
@@ -94,13 +132,13 @@ export default function HomePage() {
                             <SparklesIcon className="text-[#EF835D]" size={20} /> For You
                         </h2>
                     </div>
-                    {/* <div className="flex overflow-x-auto gap-4 px-4 pb-6 scrollbar-hide snap-x snap-mandatory">
-                        {events.slice(0, 4).map(e => (
+                    <div className="flex overflow-x-auto gap-4 px-4 pb-6 scrollbar-hide snap-x snap-mandatory">
+                        {recommendations.slice(0, 4).map(e => (
                             <div key={e.id} className="snap-center shrink-0 first:pl-0 last:pr-4">
                                 <EventCard event={e} recommended={true} />
                             </div>
                         ))}
-                    </div> */}
+                    </div>
                 </div>
 
                 {/* Nearby */}

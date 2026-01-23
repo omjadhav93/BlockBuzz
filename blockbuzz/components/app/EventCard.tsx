@@ -63,10 +63,13 @@ const CompactEventCard = ({ recommended, event }: EventProps) => {
 
                 {/* Scaled Info Section */}
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 text-[#8E9AAF]">
-                        <MapPin size={14} strokeWidth={2.5} />
-                        <span className="text-xs font-semibold">{formatDistance(event.distance)}</span>
-                    </div>
+                    {!recommended && (
+                        <div className="flex items-center gap-1 text-[#8E9AAF]">
+                            <MapPin size={14} strokeWidth={2.5} />
+                            <span className="text-xs font-semibold">{formatDistance(event.distance)}</span>
+                        </div>
+                    )}
+
 
                     <div className="flex items-center gap-1 text-[#8E9AAF]">
                         <Calendar size={14} strokeWidth={2.5} />
