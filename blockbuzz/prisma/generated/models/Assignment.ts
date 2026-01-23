@@ -286,7 +286,7 @@ export type AssignmentOrderByWithRelationInput = {
 
 export type AssignmentWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  volunteerId_eventId?: Prisma.AssignmentVolunteerIdEventIdCompoundUniqueInput
+  id_volunteerId_eventId?: Prisma.AssignmentIdVolunteerIdEventIdCompoundUniqueInput
   AND?: Prisma.AssignmentWhereInput | Prisma.AssignmentWhereInput[]
   OR?: Prisma.AssignmentWhereInput[]
   NOT?: Prisma.AssignmentWhereInput | Prisma.AssignmentWhereInput[]
@@ -302,7 +302,7 @@ export type AssignmentWhereUniqueInput = Prisma.AtLeast<{
   eventId?: Prisma.StringFilter<"Assignment"> | string
   volunteer?: Prisma.XOR<Prisma.VolunteerScalarRelationFilter, Prisma.VolunteerWhereInput>
   event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.EventWhereInput>
-}, "id" | "volunteerId_eventId">
+}, "id" | "id_volunteerId_eventId">
 
 export type AssignmentOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -446,7 +446,8 @@ export type AssignmentOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type AssignmentVolunteerIdEventIdCompoundUniqueInput = {
+export type AssignmentIdVolunteerIdEventIdCompoundUniqueInput = {
+  id: string
   volunteerId: string
   eventId: string
 }

@@ -16,7 +16,6 @@ export interface DecodedToken {
 export async function verifyToken(request: NextRequest): Promise<DecodedToken | null> {
     try {
         const token = request.cookies.get("token")?.value;
-        console.log("token", token)
         if (!token) {
             return null;
         }
