@@ -1,0 +1,238 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider   = "prisma-client"
+  output     = "./generated"
+  engineType = "client"
+  runtime    = "bun"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// User
+model User {
+  id               String   @id @default(uuid())
+  name             String
+  email            String   @unique
+  password         String?
+  locationCity     String?
+  engagement_score Float    @default(0)
+  createdAt        DateTime @default(now())
+
+  interests    Interest[]
+  interactions Interaction[]
+
+  organizer Organizer?
+  volunteer Volunteer?
+
+  registrations EventRegistration[]
+  comments      Comments[]
+}
+
+// Interest
+model Interest {
+  id               String     @id @default(uuid())
+  name             String     @unique
+  main             Boolean    @default(false)
+  subInterests     Interest[] @relation("InterestToSubInterests")
+  parentInterest   Interest?  @relation("InterestToSubInterests", fields: [parentInterestId], references: [id])
+  parentInterestId String?
+  user             User[]
+  event            Event[]
+}
+
+// Organizer
+model Organizer {
+  id          String  @id @default(uuid())
+  userId      String  @unique
+  user        User    @relation(fields: [userId], references: [id])
+  verified    Boolean @default(false)
+  rating      Float   @default(0)
+  totalEvents Int     @default(0)
+  host_score  Float   @default(0.1)
+  trust_score Float   @default(0.5)
+
+  events  Event[]
+  reports Reports[]
+}
+
+model Reports {
+  id          String   @id @default(uuid())
+  organizerId String
+  eventId     String
+  report      String
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  organizer Organizer @relation(fields: [organizerId], references: [id])
+  event     Event     @relation(fields: [eventId], references: [id])
+}
+
+// Event
+enum VenueType {
+  INDOOR
+  OUTDOOR
+}
+
+model Event {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  city        String?
+  venue       String?
+  venue_type  VenueType?
+  latitude    Float?
+  longitude   Float?
+  startTime   DateTime?
+  endTime     DateTime?
+  capacity    Int?
+  createdAt   DateTime   @default(now())
+
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+
+  cancelled          Boolean   @default(false)
+  cancelledAt        DateTime?
+  cancellationReason String?
+
+  organizerId String
+  organizer   Organizer @relation(fields: [organizerId], references: [id])
+
+  interests    Interest[]
+  interactions Interaction[]
+
+  volunteers    Assignment[]
+  registrations EventRegistration[]
+  comments      Comments[]
+  reports       Reports[]
+
+  volunteerRequirements VolunteerRequirement[]
+}
+
+enum InteractionType {
+  VIEW
+  SAVE
+  REGISTER
+  ATTENDED
+}
+
+model Interaction {
+  id        String          @id @default(uuid())
+  type      InteractionType
+  cnt       Int             @default(1)
+  createdAt DateTime        @default(now())
+
+  userId  String
+  eventId String
+
+  user  User  @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@unique([userId, eventId, type])
+}
+
+enum RegistrationStatus {
+  REGISTERED
+  CANCELLED
+  ATTENDED
+}
+
+model EventRegistration {
+  id        String             @id @default(uuid())
+  userId    String
+  eventId   String
+  status    RegistrationStatus @default(REGISTERED)
+  createdAt DateTime           @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@unique([userId, eventId]) // prevent duplicate registrations
+}
+
+model Comments {
+  id        String   @id @default(uuid())
+  userId    String
+  eventId   String
+  comment   String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+}
+
+// Volunteer
+enum VolunteerRole {
+  LEAD // Lead volunteer
+  CHECK_IN // Entry management, ticket/QR verification
+  REGISTRATION // On-spot registrations, attendee help
+  EVENT_SUPPORT // General on-ground assistance
+  TECH_SUPPORT // AV setup, projector, mic, live stream
+  CROWD_MANAGEMENT // Crowd control, seating, movement
+  STAGE_SUPPORT // Speaker coordination, stage setup
+  CONTENT_CREW // Photography, videography, social media
+  LOGISTICS // Equipment, materials, supplies
+  MEDICAL // Medical handling, first aid support
+  SECURITY // Security handling
+  OTHER // Other
+}
+
+model Volunteer {
+  id     String @id @default(uuid())
+  userId String @unique
+
+  bio      String?
+  rating   Float   @default(0)
+  verified Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id])
+
+  experience  Int          @default(0) // number of events volunteered
+  assignments Assignment[]
+}
+
+enum AssignmentStatus {
+  APPLIED
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+model Assignment {
+  id          String           @id @default(uuid())
+  role        VolunteerRole
+  other_role  String?
+  status      AssignmentStatus @default(APPLIED)
+  appliedAt   DateTime         @default(now())
+  completedAt DateTime?
+  assignedAt  DateTime?
+  rating      Float?
+  feedback    String?
+
+  volunteerId String
+  eventId     String
+
+  volunteer Volunteer @relation(fields: [volunteerId], references: [id])
+  event     Event     @relation(fields: [eventId], references: [id])
+
+  @@unique([volunteerId, eventId])
+}
+
+model VolunteerRequirement {
+  id            String        @id @default(uuid())
+  eventId       String
+  role          VolunteerRole
+  other_role    String?
+  requiredCount Int
+  filledCount   Int           @default(0)
+  skills        String[]
+  description   String?
+  createdAt     DateTime      @default(now())
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@unique([eventId, role])
+}
