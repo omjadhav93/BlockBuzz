@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/prisma/db";
 import { getOrganizerId } from "@/lib/auth";
 import { VolunteerRole, VenueType } from "@/prisma/generated/enums";
+import { getEmbedding } from "@/lib/embeddings";
 
 // Zod schema for event publish validation
 // All fields (except id) are REQUIRED for publishing
@@ -146,6 +147,15 @@ export async function POST(request: NextRequest) {
                 );
             }
 
+            const text = `
+                ${title}
+                ${description}
+                ${city}
+                ${venue}
+                ${interests.join(", ")}
+                `;
+            const embedding = await getEmbedding(text);
+
             // Update the event with all details and set published to true
             const publishedEvent = await prisma.$transaction(async (tx) => {
                 // Update event details and interests
@@ -171,6 +181,13 @@ export async function POST(request: NextRequest) {
                         },
                     },
                 });
+
+                // Update embedding separately using raw SQL (Prisma doesn't support Unsupported types in TypeScript)
+                await tx.$executeRaw`
+                    UPDATE "Event" 
+                    SET embedding = ${embedding}::vector 
+                    WHERE id = ${event.id}
+                `;
 
                 // Handle volunteer requirements
                 for (const req of volunteerRequirements) {
@@ -268,6 +285,15 @@ export async function POST(request: NextRequest) {
             );
         } else {
             // No id provided - create a new event and publish it directly
+            const text = `
+                ${title}
+                ${description}
+                ${city}
+                ${venue}
+                ${interests.join(", ")}
+                `;
+            const embedding = await getEmbedding(text);
+
             const newEvent = await prisma.$transaction(async (tx) => {
                 // Create event with interests
                 const event = await tx.event.create({
@@ -291,6 +317,13 @@ export async function POST(request: NextRequest) {
                         },
                     },
                 });
+
+                // Update embedding separately using raw SQL (Prisma doesn't support Unsupported types in TypeScript)
+                await tx.$executeRaw`
+                    UPDATE "Event" 
+                    SET embedding = ${embedding}::vector 
+                    WHERE id = ${event.id}
+                `;
 
                 // Create volunteer requirements
                 for (const req of volunteerRequirements) {
