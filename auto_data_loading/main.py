@@ -10,10 +10,10 @@ def main():
     # user_reg_login()
     # organizer()
     # volunteer()
-    # create_interests()
-    map_interests()
-    add_events()
-    interactions()
+    create_interests()
+    # map_interests()
+    # add_events()
+    # interactions()
     
 
 if __name__ == "__main__":
