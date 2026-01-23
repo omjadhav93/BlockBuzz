@@ -24,7 +24,7 @@ import router from "next/router";
 const options = [
     { title: "Events History", icon: Calendar, Link: "/profile/events" },
     { title: "Volunteer", icon: HandshakeIcon, Link: "/profile/volunteer" },
-    { title: "Organizer", icon: UserCog, Link: "/profile/host" },
+    { title: "Organizer", icon: UserCog, Link: "/profile/organizer" },
     { title: "Privacy & Security", icon: Shield, Link: "/profile/security" },
     {
         title: "Help & Support",
@@ -64,19 +64,18 @@ export default function ProfilePage() {
     );
 
     const user = data?.user;
-    console.log("user ", user)
 
     /* ---------------------------------- */
     /* Guards                             */
     /* ---------------------------------- */
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center h-[60vh]">
-                <Loader2 className="w-8 h-8 animate-spin text-[#EF835D]" />
-            </div>
-        );
-    }
+    // if (isLoading) {
+    //     return (
+    //         <div className="flex items-center justify-center h-[60vh]">
+    //             <Loader2 className="w-8 h-8 animate-spin text-[#EF835D]" />
+    //         </div>
+    //     );
+    // }
 
     // if (error) {
     //     return (
