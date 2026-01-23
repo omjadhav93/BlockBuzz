@@ -9,6 +9,7 @@ import { getGreeting } from "@/lib/greet";
 import { mockEvents } from "@/mockData/Event-Mock-Data"
 interface Location { lat: number; lng: number; }
 import { Event } from "@/mockData/Event-Mock-Data"
+import { useUserStore } from "@/app/store/user.store";
 // interface Event { id: string; title: string; daysLeft: string, startTime: string, latitude: number; longitude: number; live: boolean; distance: number; }
 
 const defaultLoc: Location = { lat: 18.5195, lng: 73.8553 };
@@ -21,7 +22,7 @@ export default function HomePage() {
     const [center] = useState<Location>(defaultLoc);
     const [radius] = useState(50);
     const [visibleCount, setVisibleCount] = useState(4);
-
+    const user = useUserStore((state) => state.user);
     const { data } = useSWR(`/api/event/nearby?lat=${center.lat}&long=${center.lng}&radius=${radius}`, fetcher);
     const events: Event[] = data?.events || mockEvents;
 
@@ -56,7 +57,7 @@ export default function HomePage() {
                 <div className="flex justify-between items-center">
                     <div className="flex-1">
                         <span className="text-[10px] font-bold text-gray-400 tracking-widest uppercase">
-                            {getGreeting()}, Rahul 👋
+                            {getGreeting()}, {user?.name} 👋
                         </span>
                         <h1 className="text-xl font-bold text-slate-900 tracking-tight">Discover Events</h1>
                     </div>
