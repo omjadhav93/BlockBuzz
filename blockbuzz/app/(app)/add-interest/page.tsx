@@ -12,19 +12,6 @@ interface Interest {
     name: string;
 }
 
-const Interests: Interest[] = [
-    { id: 1, name: "Technology" },
-    { id: 2, name: "NGO" },
-    { id: 3, name: "Education" },
-    { id: 4, name: "Sports" },
-    { id: 5, name: "Travel" },
-    { id: 6, name: "Food" },
-    { id: 7, name: "Fashion" },
-    { id: 8, name: "Health" },
-    { id: 9, name: "Music" },
-    { id: 10, name: "Fitness" },
-];
-
 /* ---------------- Fetcher ---------------- */
 const fetcher = async (url: string) => {
     const res = await fetch(url);
@@ -59,7 +46,7 @@ export default function AddInterest() {
 
     /* ---------------- SWR ---------------- */
     const { data, isLoading } = useSWR(
-        "/api/interest/list",
+        "/api/admin/interest",
         fetcher,
         {
             fallbackData: { data: getCachedInterests() },
@@ -67,8 +54,7 @@ export default function AddInterest() {
             revalidateOnReconnect: false,
         }
     );
-
-    const interestList: Interest[] = data?.data?.slice(0, 10) || Interests;
+    const interestList: Interest[] = data?.interests?.slice(0, 15) || [];
 
     /* ------------- Toggle ------------- */
     const toggleInterest = (id: string) => {
@@ -92,21 +78,21 @@ export default function AddInterest() {
         setError(null);
 
         try {
-            // const res = await fetch("/api/user/interest/update", {
-            //     method: "PATCH",
-            //     headers: { "Content-Type": "application/json" },
-            //     credentials: "include",
-            //     body: JSON.stringify({
-            //         interests: selectedInterests,
-            //     }),
-            // });
+            const res = await fetch("/api/user/interest", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    interests: selectedInterests,
+                }),
+            });
 
-            // const result = await res.json();
+            const result = await res.json();
 
-            // if (!res.ok) {
-            //     setError(result?.message || "Failed to save interests.");
-            //     return;
-            // }
+            if (!res.ok) {
+                setError(result?.message || "Failed to save interests.");
+                return;
+            }
 
             router.push("/homepage");
         } catch {

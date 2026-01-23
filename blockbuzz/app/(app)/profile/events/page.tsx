@@ -87,7 +87,7 @@ export default function EventPage() {
                 <h1 className="text-sm font-black text-slate-500 tracking-[0.2em] uppercase">
                     My Events
                 </h1>
-                <div className="w-10" /> {/* Spacer for balance */}
+                <div className="w-10" />
             </header>
 
             <main className="px-6 pt-6">

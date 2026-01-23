@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useUserStore } from "@/app/store/user.store";
 
 const fetcher = (url: string) =>
     fetch(url, { credentials: "include" }).then((res) => res.json());
@@ -26,12 +27,12 @@ type TabType = "upcoming" | "past" | "drafts";
 
 export default function HostPage() {
     const router = useRouter();
+    const { user } = useUserStore();
+    const isHost = user?.isOrganizer || true;
     const { data, isLoading } = useSWR("/api/organizer/event/list", fetcher);
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState<TabType>("upcoming");
-
     // Replace with actual logic if needed
-    const isHost = false;
 
     const events = data?.events ?? {
         Upcoming: [],
@@ -54,15 +55,14 @@ export default function HostPage() {
     const becomeHost = async () => {
         try {
             setLoading(true);
-            // replace by original api call
-            // const res = await fetch("/api/organizer/become-host", {
-            //     method: "POST",
-            //     credentials: "include",
-            // });
-            // const data = await res.json();
-            // if (data.success) {
-            //     router.refresh();
-            // }
+            const res = await fetch("/api/organizer/request", {
+                method: "POST",
+                credentials: "include",
+            });
+            const data = await res.json();
+            if (data.success) {
+                router.refresh();
+            }
         } catch (error) {
             console.error("Error becoming host:", error);
         } finally {
@@ -103,7 +103,7 @@ export default function HostPage() {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="bg-[#EF835D] p-5 rounded-[2.5rem] text-white shadow-lg shadow-[#EF835D]/20 relative overflow-hidden">
                                 <Users size={20} className="mb-2 opacity-80" />
-                                <p className="text-2xl font-black">128</p>
+                                <p className="text-2xl font-black">0</p>
                                 <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">Volunteers</p>
                                 <Users size={60} className="absolute -right-4 -bottom-4 opacity-10" />
                             </div>
@@ -169,7 +169,7 @@ export default function HostPage() {
                         </div>
                     </div>
                 ) : (
-                    <EmptyState becomeHost={() => { }} loading={loading} />
+                    <EmptyState becomeHost={() => { becomeHost }} loading={loading} />
                 )}
             </main>
 

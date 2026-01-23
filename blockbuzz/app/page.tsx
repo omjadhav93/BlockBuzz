@@ -17,9 +17,9 @@ export default function LoadingScreen() {
     }, 2000);
 
     if (user) {
-      router.replace("/homepage")
+      router.push("/homepage")
     } else {
-      router.replace("/onboarding")
+      router.push("/onboarding")
     }
     clearTimeout(dotsTimer);
   }, [user, isHydrated, router]);

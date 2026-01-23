@@ -15,6 +15,7 @@ import {
 import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
+import { useUserStore } from "@/app/store/user.store";
 
 const fetcher = (url: string) =>
     fetch(url, { credentials: "include" }).then(res => res.json());
@@ -142,11 +143,9 @@ const EventCard = ({ event }: { event: VolunteerEvent }) => {
 
 export default function VolunteerPage() {
     const router = useRouter();
-    const { data, isValidating, isLoading } = useSWR("/api/user/profile", fetcher);
+    const { user } = useUserStore();
 
-    // todo: fetch the data of the volunteer from the api and show it in the form of the cards.
-
-    const isVolunteer = !!data?.user?.volunteer?.verified || true;
+    const isVolunteer = !!user?.isVolunteer || true;
 
     if (isVolunteer == null) {
         return <div className="flex items-center justify-center h-[60vh]">
@@ -171,7 +170,7 @@ export default function VolunteerPage() {
                             <div className="relative z-10 flex justify-between items-end">
                                 <div>
                                     <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">Verified Volunteer</span>
-                                    <h2 className="text-2xl font-black mt-3">{data?.data?.name || "Volunteer"}</h2>
+                                    <h2 className="text-2xl font-black mt-3">{user?.name || "Volunteer"}</h2>
                                     <p className="text-white/80 text-xs mt-1">Impact Maker since 2025</p>
                                 </div>
                                 <div className="text-right">
