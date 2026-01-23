@@ -69,13 +69,13 @@ export default function ProfilePage() {
     /* Guards                             */
     /* ---------------------------------- */
 
-    // if (isLoading) {
-    //     return (
-    //         <div className="flex items-center justify-center h-[60vh]">
-    //             <Loader2 className="w-8 h-8 animate-spin text-[#EF835D]" />
-    //         </div>
-    //     );
-    // }
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-[60vh]">
+                <Loader2 className="w-8 h-8 animate-spin text-[#EF835D]" />
+            </div>
+        );
+    }
 
     // if (error) {
     //     return (

@@ -40,6 +40,7 @@ export async function PATCH(request: NextRequest) {
         if (error) return error;
 
         const { interests } = await request.json();
+        console.log("interest from backend", interests)
 
         // Validate that interests is an array
         if (!Array.isArray(interests)) {

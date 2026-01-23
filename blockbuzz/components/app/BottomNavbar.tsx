@@ -30,10 +30,10 @@ const BottomNavbar = () => {
             </Link>
 
             {/* Map Section */}
-            <Link href="/map" className={navItemClasses(isActive('/map'))}>
-                <Map size={24} strokeWidth={isActive('/map') ? 2.5 : 2} />
-                <span className={`text-xs ${isActive('/map') ? "font-semibold" : "font-medium"}`}>
-                    Map
+            <Link href="/maps" className={navItemClasses(isActive('/maps'))}>
+                <Map size={24} strokeWidth={isActive('/maps') ? 2.5 : 2} />
+                <span className={`text-xs ${isActive('/maps') ? "font-semibold" : "font-medium"}`}>
+                    Maps
                 </span>
             </Link>
 
