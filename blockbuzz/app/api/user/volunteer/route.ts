@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
                 verified: true,
                 assignments: {
                     select: {
+                        id: true,
                         event: {
                             select: {
                                 id: true,
@@ -27,6 +28,7 @@ export async function GET(request: NextRequest) {
                                 startTime: true,
                                 endTime: true,
                                 capacity: true,
+                                description: true,
                             },
                         },
                         role: true,
@@ -48,11 +50,28 @@ export async function GET(request: NextRequest) {
             );
         }
 
+        const structedVolunter = volunteer.assignments.map((assignment) => ({
+            id: assignment.event.id,
+            title: assignment.event.title,
+            date: assignment.event.startTime?.getFullYear() + "-" + assignment.event.startTime?.getMonth() + "-" + assignment.event.startTime?.getDate(),
+            time: assignment.event.startTime?.getHours() + ":" + assignment.event.startTime?.getMinutes() + " to " + assignment.event.endTime?.getHours() + ":" + assignment.event.endTime?.getMinutes(),
+            location: assignment.event.venue + ", " + assignment.event.city,
+            role: assignment.role,
+            description: assignment.event.description,
+            status: assignment.status,
+            assignedAt: assignment.assignedAt,
+        }))
+
+        const formattedVolunteer = {
+            "Upcoming": structedVolunter.filter((assignment) => assignment.status !== "COMPLETED"),
+            "Past": structedVolunter.filter((assignment) => assignment.status === "COMPLETED"),
+        }
+
         return NextResponse.json(
             {
                 success: true,
                 message: "Volunteer profile fetched successfully",
-                data: volunteer,
+                data: formattedVolunteer,
             },
             { status: 200 }
         );

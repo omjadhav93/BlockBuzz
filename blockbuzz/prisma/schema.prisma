@@ -220,7 +220,7 @@ model Assignment {
   volunteer Volunteer @relation(fields: [volunteerId], references: [id])
   event     Event     @relation(fields: [eventId], references: [id])
 
-  @@unique([id, volunteerId, eventId])
+  @@unique([volunteerId, eventId])
 }
 
 model VolunteerRequirement {

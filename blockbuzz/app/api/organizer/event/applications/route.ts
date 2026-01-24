@@ -162,6 +162,7 @@ export async function POST(request: NextRequest) {
             include: {
                 event: {
                     select: {
+                        id: true,
                         organizerId: true,
                     },
                 },
@@ -188,14 +189,32 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const updatedAssignment = await prisma.assignment.update({
-            where: {
-                id: assignmentId,
-            },
-            data: {
-                status: status as AssignmentStatus,
-                feedback,
-            },
+        const updatedAssignment = await prisma.$transaction(async (tx) => {
+            const assignment = await tx.assignment.update({
+                where: {
+                    id: assignmentId,
+                },
+                data: {
+                    status: status as AssignmentStatus,
+                    feedback,
+                },
+            });
+
+            await tx.volunteerRequirement.update({
+                where: {
+                    eventId_role: {
+                        eventId: assignment.eventId!,
+                        role: assignment.role,
+                    }
+                },
+                data: {
+                    filledCount: {
+                        increment: 1,
+                    }
+                },
+            });
+
+            return assignment;
         });
 
         return NextResponse.json(

@@ -15,11 +15,16 @@ import {
     HandHelping,
     Info,
     QrCode,
+    ShieldCheck,
+    ChevronRight,
+    Send,
     X // Added X for closing the list
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ShareButton from "@/components/app/ShareButton";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
 const fetcher = async (url: string) => {
@@ -43,7 +48,10 @@ export default function EventDetailPage() {
     const [showPendingVolunteers, setShowPendingVolunteers] = useState(false);
     const [showTicketModal, setShowTicketModal] = useState(false);
     const [loadingRegister, setLoadingRegister] = useState(false)
-
+    const [volunteerModal, setVolunteerModal] = useState(false)
+    const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
+    const [applicationText, setApplicationText] = useState("");
+    const [loadingApply, setLoadingApply] = useState(false);
 
     const { data, isLoading } = useSWR(
         `/api/event/view?eventId=${eventId}&role=${role}`,
@@ -51,6 +59,7 @@ export default function EventDetailPage() {
     );
 
     const event = data?.data;
+    const requirements = event?.requirement;
 
     let VolunteerData;
     let VolunteerLoading;
@@ -62,8 +71,9 @@ export default function EventDetailPage() {
     }
 
 
-    const volunteerData = VolunteerData?.applications.accepted || [];
-    const pendingVolunteerData = VolunteerData?.applications.pending || [];
+
+    const volunteerData = VolunteerData!.applications.accepted || [];
+    const pendingVolunteerData = VolunteerData!.applications.pending || [];
 
     const isPageLoading = isLoading || (role === "Organizer" && VolunteerLoading);
 
@@ -91,7 +101,7 @@ export default function EventDetailPage() {
 
             const result = await response.json();
             if (!result.success) {
-                alert("Error in adding volunteer", result.error);
+                alert("Error in adding volunteer");
             } else {
                 alert("Volunteer added successfully");
                 router.refresh();
@@ -101,7 +111,7 @@ export default function EventDetailPage() {
         }
     }
 
-    const handleRegisterToVolunteer = async () => {
+    const handleRegisterAsAttendee = async () => {
         try {
             const res = await fetch(`/api/event/register`, {
                 method: "POST",
@@ -116,13 +126,45 @@ export default function EventDetailPage() {
 
             const result = await res.json();
             if (!result.success) {
-                alert("Error in registering to event", result.error);
+                alert("Error in registering to event");
             } else {
                 alert("Registered successfully");
                 router.refresh();
             }
         } catch (error) {
             console.log(error);
+        }
+    }
+
+    const handleRegisterAsVolunteer = async () => {
+        setLoadingApply(true);
+        try {
+            const res = await fetch(`/api/user/volunteer/event/apply`, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    eventId,
+                    role: selectedRoleId,
+                    applicationText
+                })
+            })
+
+            const data = await res.json();
+            if (!data.success) {
+                alert("You need to verify yourself as volunteer first");
+                router.push("/profile/volunteer");
+            } else {
+                alert("Registered successfully");
+                router.refresh();
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoadingApply(false);
+            setVolunteerModal(false);
         }
     }
 
@@ -351,10 +393,67 @@ export default function EventDetailPage() {
             )}
 
             {/* Sticky CTA */}
-            <div className="fixed bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-xl border-t border-slate-100 z-50">
-                {/* {role === "Organizer" && <PrimaryBtn icon={<BarChart3 />} text="View Attendee Analytics" />} */}
-                {role === "User" && event.registered ? <PrimaryBtn onClick={() => setShowTicketModal(true)} icon={<Ticket />} text="View Ticket" /> : <PrimaryBtn onClick={handleRegisterToVolunteer} icon={<HandHelping />} text={loadingRegister ? "Registering..." : "Register Now"} />}
-                {role === "Volunteer" && <PrimaryBtn icon={<HandHelping />} text="View Assignment" />}
+            <div className="fixed bottom-0 left-0 right-0 z-50">
+                {/* Subtle gradient overlay to make the dock pop */}
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent h-full -z-10" />
+
+                <div className="max-w-md mx-auto p-6">
+                    <div className="bg-white/90 backdrop-blur-2xl border border-slate-200/50 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[2.5rem] p-3 flex items-center gap-2">
+
+                        {/* CASE 1: USER IS ALREADY REGISTERED */}
+                        {role === "User" && event.registered && (
+                            <button
+                                onClick={() => setShowTicketModal(true)}
+                                className="w-full flex items-center justify-between bg-slate-900 hover:bg-slate-800 text-white p-2 pl-6 rounded-full transition-all group"
+                            >
+                                <span className="font-black text-xs uppercase tracking-widest">View Entry Pass</span>
+                                <div className="w-10 h-10 bg-[#EF835D] rounded-full flex items-center justify-center group-hover:rotate-12 transition-transform">
+                                    <Ticket size={18} />
+                                </div>
+                            </button>
+                        )}
+
+                        {/* CASE 2: NEW USER REGISTRATION CHOICES */}
+                        {role === "User" && !event.registered && (
+                            <div className="flex w-full gap-2">
+                                {/* Secondary Action: Attendee */}
+                                <button
+                                    onClick={handleRegisterAsAttendee}
+                                    disabled={loadingRegister}
+                                    className="flex-1 h-12 rounded-full border border-slate-100 bg-slate-50 text-slate-600 text-[10px] font-black uppercase tracking-wider hover:bg-slate-100 transition-colors"
+                                >
+                                    {loadingRegister ? "..." : "Be as Attendee"}
+                                </button>
+
+                                {/* Primary Action: Volunteer */}
+                                <button
+                                    onClick={() => setVolunteerModal(true)}
+                                    disabled={loadingRegister}
+                                    className="flex-[1.5] h-12 rounded-full bg-[#EF835D] text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-[#EF835D]/20 active:scale-95 transition-all"
+                                >
+                                    <HandHelping size={14} strokeWidth={3} />
+                                    {loadingRegister ? "Joining..." : "Be a Volunteer"}
+                                </button>
+                            </div>
+                        )}
+
+                        {/* CASE 3: ACTIVE VOLUNTEER */}
+                        {role === "Volunteer" && (
+                            <button
+                                className="w-full flex items-center gap-4 bg-slate-50 p-2 rounded-full group transition-all"
+                            >
+                                <div className="w-10 h-10 bg-white shadow-sm rounded-full flex items-center justify-center text-[#EF835D]">
+                                    <ShieldCheck size={20} />
+                                </div>
+                                <div className="flex flex-col items-start">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter leading-none">Status</span>
+                                    <span className="text-xs font-bold text-slate-900">View Assignments</span>
+                                </div>
+                                <ChevronRight size={16} className="ml-auto mr-4 text-slate-300 group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {showTicketModal && (
@@ -449,6 +548,104 @@ export default function EventDetailPage() {
                             <Info size={14} />
                             <p className="text-[10px] font-bold uppercase tracking-widest">
                                 Screenshot this for offline use
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {volunteerModal && (
+                <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center animate-in fade-in duration-300">
+                    <div
+                        className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+                        onClick={() => setVolunteerModal(false)}
+                    />
+
+                    <div className="relative w-full max-w-lg bg-white rounded-t-[3rem] sm:rounded-[3rem] shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-500">
+                        {/* Header */}
+                        <div className="p-8 pb-4 flex justify-between items-center">
+                            <div>
+                                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Apply to Volunteer</h2>
+                                <p className="text-xs font-bold text-[#EF835D] uppercase tracking-widest mt-1">
+                                    {requirements?.length} Roles Available
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setVolunteerModal(false)}
+                                className="p-3 bg-slate-50 text-slate-400 rounded-full hover:bg-slate-100 transition-colors"
+                            >
+                                <X size={20} strokeWidth={3} />
+                            </button>
+                        </div>
+
+                        <div className="px-8 pb-10 space-y-6 max-h-[70vh] overflow-y-auto">
+                            {/* 1. ROLE SELECTION */}
+                            <div className="space-y-3">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Select your preferred role</Label>
+                                <div className="grid grid-cols-1 gap-3">
+                                    {requirements && requirements.map((req: any) => (
+                                        <div
+                                            key={req.id}
+                                            onClick={() => setSelectedRoleId(req.id)}
+                                            className={`relative p-5 rounded-[2rem] border-2 cursor-pointer transition-all duration-300 ${selectedRoleId === req.id
+                                                ? "border-[#EF835D] bg-[#EF835D]/5 ring-4 ring-[#EF835D]/10"
+                                                : "border-slate-100 bg-slate-50/50 hover:border-slate-200"
+                                                }`}
+                                        >
+                                            <div className="flex justify-between items-center">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${selectedRoleId === req.id ? "bg-[#EF835D] text-white" : "bg-white text-slate-400 border border-slate-100"
+                                                        }`}>
+                                                        <HandHelping size={20} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-black text-slate-900 text-sm tracking-tight capitalize">
+                                                            {req.role.replace('_', ' ')}
+                                                        </p>
+                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                                                            {req.requiredCount} Spots remaining
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                {selectedRoleId === req.id && (
+                                                    <div className="w-6 h-6 bg-[#EF835D] rounded-full flex items-center justify-center text-white animate-in zoom-in">
+                                                        <Check size={14} strokeWidth={4} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* 2. THE PITCH */}
+                            <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Why should the host pick you?</Label>
+                                <Textarea
+                                    placeholder="Mention your experience or why you're passionate about this event..."
+                                    className="rounded-[2rem] border-slate-100 bg-slate-50/50 p-6 min-h-[120px] focus-visible:ring-[#EF835D] transition-all"
+                                    onChange={(e) => setApplicationText(e.target.value)}
+                                />
+                            </div>
+
+                            {/* SUBMIT ACTION */}
+                            <Button
+                                disabled={!selectedRoleId || loadingApply}
+                                onClick={handleRegisterAsVolunteer}
+                                className="w-full h-16 rounded-[2rem] bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-widest shadow-xl shadow-slate-200 disabled:bg-slate-100 transition-all flex items-center justify-center gap-3"
+                            >
+                                {loadingApply ? (
+                                    <Loader2 className="animate-spin" />
+                                ) : (
+                                    <>
+                                        Send Request to Host
+                                        <Send size={18} />
+                                    </>
+                                )}
+                            </Button>
+
+                            <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                The host will be notified of your application
                             </p>
                         </div>
                     </div>

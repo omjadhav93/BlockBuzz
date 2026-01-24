@@ -122,11 +122,12 @@ export async function GET(request: NextRequest) {
             },
         });
 
+
         const VolunteerEvent = {
             ...formattedEvent,
             role: assignment?.role,
             other_role: assignment?.other_role,
-            feedback: assignment?.feedback,
+            feedback: assignment?.feedback
         }
 
         return NextResponse.json({
@@ -150,9 +151,16 @@ export async function GET(request: NextRequest) {
 
         await addInteraction(userId!, eventId, InteractionType.VIEW);
 
+        const requirement = await prisma.volunteerRequirement.findMany({
+            where: {
+                eventId: eventId,
+            },
+        });
+
         const UserEvent = {
             ...formattedEvent,
             registered: registration ? true : false,
+            requirement: requirement,
         }
 
         return NextResponse.json({

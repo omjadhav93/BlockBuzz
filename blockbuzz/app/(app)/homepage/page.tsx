@@ -79,7 +79,7 @@ export default function HomePage() {
         const getRecommandations = async () => {
             try {
                 setRecommendLoading(true);
-                const response = await fetch("/api/event/recommend", {
+                const response = await fetch("https://recommendation-model-dczc.onrender.com/api/event/recommend", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -223,10 +223,6 @@ export default function HomePage() {
                             </div>
                         ))}
                     </div>
-                    <h2 className="text-xl font-bold flex items-center gap-2 px-4">
-                        <SparklesIcon size={20} className="text-[#EF835D]" />
-                        For You
-                    </h2>
                 </div>
 
                 {/* ---------- NEARBY EVENTS ---------- */}
