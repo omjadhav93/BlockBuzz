@@ -62,7 +62,7 @@ export const fetchRecommendations = async (user: UserDetails): Promise<Recommend
         }
     }));
     console.log(user);
-    const recommendations = await fetch("http://localhost:8000/api/recommend", {
+    const recommendations = await fetch("https://recommendation-model-dczc.onrender.com/api/recommend", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
