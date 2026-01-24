@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react"; // Added useState
+import React, { useState, Suspense } from "react"; // Added Suspense
 import useSWR from "swr";
 import {
     ChevronLeft,
@@ -37,7 +37,7 @@ const fetcher = async (url: string) => {
     return res.json();
 };
 
-export default function EventDetailPage() {
+function EventDetailContent() {
     const router = useRouter();
     const params = useSearchParams();
     const role = params.get("role");
@@ -695,5 +695,17 @@ function PrimaryBtn({ text, icon, onClick }: { text: string; icon?: React.ReactN
         <button onClick={onClick} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl flex items-center justify-center gap-3">
             {text} {icon}
         </button>
+    );
+}
+
+export default function EventDetailPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center text-lg font-bold">
+                <Loader2 className="w-4 h-4 animate-spin" />
+            </div>
+        }>
+            <EventDetailContent />
+        </Suspense>
     );
 }

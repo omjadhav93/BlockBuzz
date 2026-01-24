@@ -79,7 +79,7 @@ export default function HomePage() {
         const getRecommandations = async () => {
             try {
                 setRecommendLoading(true);
-                const response = await fetch("https://recommendation-model-dczc.onrender.com/api/event/recommend", {
+                const response = await fetch("/api/event/recommend", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
