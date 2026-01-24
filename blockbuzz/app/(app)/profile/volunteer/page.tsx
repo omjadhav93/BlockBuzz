@@ -1,6 +1,7 @@
 "use client";
 
 import useSWR from "swr";
+import { useState } from "react";
 import BottomNavbar from "@/components/app/BottomNavbar";
 import {
     Loader2,
@@ -85,6 +86,7 @@ export const pastEvents: VolunteerEvent[] = [
     },
 ];
 
+
 // --- SUB-COMPONENT: EVENT CARD ---
 const EventCard = ({ event }: { event: VolunteerEvent }) => {
     const isPast = event.status === "PAST";
@@ -145,7 +147,47 @@ export default function VolunteerPage() {
     const router = useRouter();
     const { user } = useUserStore();
 
-    const isVolunteer = !!user?.isVolunteer || true;
+    const isVolunteer = user?.isVolunteer;
+    const [loading, setLoading] = useState(false);
+
+    const { data, isLoading } = useSWR(
+        `/api/user/volunteer`,
+        fetcher
+    );
+
+    const upcomingEvents = data?.data?.Upcoming || [];
+
+    const pastEvents = data?.data.Past || [];
+
+    const beVolunteer = async () => {
+        try {
+            setLoading(true);
+            const res = await fetch("/api/admin/volunteer", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    userId: user?.id,
+                    admin_secret: "rndblockbuzz",
+                })
+            })
+
+            const data = await res.json();
+
+            if (!data.success) {
+                alert(data.message);
+                return;
+            } else {
+                alert("You have been successfully registered as a volunteer");
+                router.refresh();
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     if (isVolunteer == null) {
         return <div className="flex items-center justify-center h-[60vh]">
@@ -202,7 +244,7 @@ export default function VolunteerPage() {
                                 {upcomingEvents.length > 0 ? (
                                     <>
                                         <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Confirmed Enrollments</p>
-                                        {upcomingEvents.map((event) => (
+                                        {upcomingEvents.map((event: any) => (
                                             <EventCard key={event.id} event={event} />
                                         ))}
                                     </>
@@ -213,7 +255,7 @@ export default function VolunteerPage() {
 
                             <TabsContent value="past" className="mt-6 space-y-4 outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
                                 {pastEvents.length > 0 ? (
-                                    pastEvents.map((event) => (
+                                    pastEvents.map((event: any) => (
                                         <EventCard key={event.id} event={event} />
                                     ))
                                 ) : (
@@ -231,8 +273,8 @@ export default function VolunteerPage() {
                         <p className="text-slate-500 text-sm px-10 leading-relaxed">
                             Join our community of volunteers and start earning points for your social contributions.
                         </p>
-                        <button className="bg-[#EF835D] text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-[#EF835D]/30 active:scale-95 transition-transform">
-                            Find Opportunities
+                        <button onClick={beVolunteer} disabled={loading} className="bg-[#EF835D] text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-[#EF835D]/30 active:scale-95 transition-transform">
+                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Find Opportunities"}
                         </button>
                     </div>
                 )}

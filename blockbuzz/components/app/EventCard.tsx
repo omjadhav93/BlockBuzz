@@ -1,5 +1,6 @@
 import React from 'react';
 import { MapPin, Calendar, ShieldCheck, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 type Event = {
     id: string,
@@ -32,9 +33,11 @@ function formatDistance(distance: number) {
 
 const CompactEventCard = ({ recommended, event }: EventProps) => {
 
+    const router = useRouter();
+
     return (
         /* Reduced max-width and rounded corners for a tighter feel */
-        <div className="w-[340px] bg-white rounded-[1.5rem] overflow-hidden shadow-sm border border-slate-100 transition-transform active:scale-[0.98]">
+        <div onClick={() => router.replace(`/events?role=User&eventId=${event.id}`)} className="w-[340px] bg-white rounded-[1.5rem] overflow-hidden shadow-sm border border-slate-100 transition-transform active:scale-[0.98]">
 
             {/* Reduced Image Height */}
             <div className="relative h-36 w-full">

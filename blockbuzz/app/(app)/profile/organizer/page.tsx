@@ -28,7 +28,7 @@ type TabType = "upcoming" | "past" | "drafts";
 export default function HostPage() {
     const router = useRouter();
     const { user } = useUserStore();
-    const isHost = user?.isOrganizer || true;
+    const isHost = user?.isOrganizer;
     const { data, isLoading } = useSWR("/api/organizer/event/list", fetcher);
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState<TabType>("upcoming");
