@@ -1,5 +1,3 @@
-# RND PU Code 3.0
-
 # BlockBuzz
 
 BlockBuzz is a comprehensive event management and recommendation platform designed to enhance user engagement through smart recommendations and incident intelligence. The platform leverages modern web technologies and advanced machine learning models to provide a seamless experience for organizers, volunteers, and attendees.
