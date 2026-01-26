@@ -11,6 +11,7 @@ import { mockEvents, Event } from "@/mockData/Event-Mock-Data";
 import { useUserStore } from "@/app/store/user.store";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 /* ---------------- TYPES ---------------- */
 interface Location {
@@ -92,7 +93,6 @@ export default function HomePage() {
                     })
                 });
                 const data = await response.json();
-                console.log("Recommendations:", data);
                 if (data.events) {
                     setRecommendations(data.events);
                 }
@@ -218,7 +218,7 @@ export default function HomePage() {
                     </div>
                     <div className="flex overflow-x-auto gap-4 px-4 pb-6 scrollbar-hide snap-x snap-mandatory">
                         {recommendations.slice(0, 4).map(e => (
-                            <div key={e.id} className="snap-center shrink-0 first:pl-0 last:pr-4">
+                            <div onClick={() => router.push(`/events?role=User&eventId=${e.id}`)} key={e.id} className="snap-center shrink-0 first:pl-0 last:pr-4">
                                 <EventCard event={e} recommended={true} />
                             </div>
                         ))}

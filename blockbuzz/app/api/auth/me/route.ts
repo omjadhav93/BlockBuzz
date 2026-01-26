@@ -32,8 +32,8 @@ export async function GET(request: NextRequest) {
             id: user?.id,
             name: user?.name,
             email: user?.email,
-            isOrganizer: user?.organizer?.verified,
-            isVolunteer: user?.volunteer?.verified
+            isOrganizer: user?.organizer?.verified || false,
+            isVolunteer: user?.volunteer?.verified || false,
         }
 
         return NextResponse.json(

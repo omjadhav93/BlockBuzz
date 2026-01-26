@@ -141,6 +141,7 @@ function EventCard({ event }: { event: EventData }) {
     const isPast = start < new Date();
     const isDraft = !event.published;
     const isCancelled = event.cancelled;
+    const router = useRouter();
 
     const getStatusUI = () => {
         if (isCancelled) return { label: "Cancelled", color: "text-red-500", bg: "bg-red-50", icon: <AlertCircle size={12} /> };
@@ -178,15 +179,13 @@ function EventCard({ event }: { event: EventData }) {
                 <DetailItem icon={<CheckCircle2 size={14} />} label={event.venue_type} />
             </div>
 
-            <Link href={`/events?role=${"User"}&eventId=${event.id}`}>
-                <div className="flex items-center gap-2 pt-4 border-t border-slate-50">
-                    <button className={`flex-1 py-4 rounded-2xl text-xs font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg ${isDraft ? "bg-amber-500 text-white shadow-amber-100" : "bg-slate-900 text-white shadow-slate-200"
-                        }`}>
-                        {isDraft ? "Complete Setup" : "Event Details"}
-                        <ArrowUpRight size={14} />
-                    </button>
-                </div>
-            </Link>
+            <div className="flex items-center gap-2 pt-4 border-t border-slate-50">
+                <button onClick={() => router.push(`/events?role=${"User"}&eventId=${event.id}`)} className={`flex-1 py-4 rounded-2xl text-xs font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg ${isDraft ? "bg-amber-500 text-white shadow-amber-100" : "bg-slate-900 text-white shadow-slate-200"
+                    }`}>
+                    {isDraft ? "Complete Setup" : "Event Details"}
+                    <ArrowUpRight size={14} />
+                </button>
+            </div>
         </div >
     );
 }

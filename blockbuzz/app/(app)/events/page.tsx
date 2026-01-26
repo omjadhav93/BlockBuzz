@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from "react"; // Added Suspense
+import React, { useState, Suspense } from "react";
 import useSWR from "swr";
 import {
     ChevronLeft,
@@ -61,19 +61,12 @@ function EventDetailContent() {
     const event = data?.data;
     const requirements = event?.requirement;
 
-    let VolunteerData;
-    let VolunteerLoading;
-    if (role === "Organizer") {
-        const { data: VolunteerData, isLoading: VolunteerLoading } = useSWR(
-            `/api/organizer/event/applications?eventId=${eventId}`,
-            fetcher
-        );
-    }
-
-
-
-    const volunteerData = VolunteerData!.applications.accepted || [];
-    const pendingVolunteerData = VolunteerData!.applications.pending || [];
+    const { data: VolunteerData, isLoading: VolunteerLoading } = useSWR(
+        role === "Organizer" ? `/api/organizer/event/applications?eventId=${eventId}` : null,
+        fetcher
+    );
+    const volunteerData = VolunteerData?.applications?.accepted || [];
+    const pendingVolunteerData = VolunteerData?.applications?.pending || [];
 
     const isPageLoading = isLoading || (role === "Organizer" && VolunteerLoading);
 
@@ -126,7 +119,7 @@ function EventDetailContent() {
 
             const result = await res.json();
             if (!result.success) {
-                alert("Error in registering to event");
+                alert(`Error in registering to event: ${result?.message}`);
             } else {
                 alert("Registered successfully");
                 router.refresh();
