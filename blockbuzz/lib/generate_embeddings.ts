@@ -2,52 +2,57 @@ import { prisma } from "../prisma/db.js";
 import { getEmbedding } from "./embeddings.js";
 
 async function run() {
-    // Using raw SQL because Prisma doesn't support filtering on Unsupported types
-    const events = await prisma.$queryRaw<Array<{
-        id: string;
-        title: string;
-        description: string | null;
-        city: string | null;
-        venue: string | null;
-    }>>`
-        SELECT id, title, description, city, venue
-        FROM "Event"
-        WHERE embedding IS NULL
-    `;
+  console.log("🔄 Fetching events without embeddings...");
 
-    for (const event of events) {
-        // Fetch interests separately for each event
-        const eventWithInterests = await prisma.event.findUnique({
-            where: { id: event.id },
-            include: { interests: true },
-        });
+  const events = await prisma.$queryRaw<Array<{
+    id: string;
+    title: string;
+    description: string | null;
+    city: string | null;
+    venue: string | null;
+  }>>`
+    SELECT id, title, description, city, venue
+    FROM "Event"
+    WHERE embedding IS NULL
+  `;
 
-        if (!eventWithInterests) continue;
+  for (const event of events) {
+    const eventWithInterests = await prisma.event.findUnique({
+      where: { id: event.id },
+      include: { interests: true },
+    });
 
-        const text = `
-            ${event.title}
-            ${event.description}
-            ${event.city}
-            ${event.venue}
-            ${eventWithInterests.interests.map(i => i.name).join(", ")}
-            `;
+    if (!eventWithInterests) continue;
 
-        const embedding = await getEmbedding(text);
+    const text = [
+      event.title,
+      event.description,
+      event.city,
+      event.venue,
+      eventWithInterests.interests.map(i => i.name).join(", "),
+    ]
+      .filter(Boolean)
+      .join(" ");
 
-        // Format embedding as PostgreSQL array: [0.1,0.2,0.3]
-        const embeddingStr = `[${embedding.join(',')}]`;
+    const embedding = await getEmbedding(text);
 
-        await prisma.$executeRaw`
+    // pgvector expects: [0.1,0.2,...]
+    const embeddingStr = `[${embedding.join(",")}]`;
+
+    await prisma.$executeRaw`
       UPDATE "Event"
       SET embedding = ${embeddingStr}::vector
       WHERE id = ${event.id};
     `;
 
-        console.log(`Embedded: ${event.title}`);
-    }
+    console.log(`✅ Embedded: ${event.title}`);
+  }
 
-    console.log("✅ All embeddings generated");
-    process.exit(0);
+  console.log("🎉 All embeddings generated");
+  process.exit(0);
 }
 
-run();
+run().catch(err => {
+  console.error("❌ Embedding failed:", err);
+  process.exit(1);
+});
