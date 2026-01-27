@@ -64,6 +64,7 @@ export default function ProfilePage() {
     );
 
     const user = data?.user;
+    console.log("profile", user);
 
     /* ---------------------------------- */
     /* Guards                             */

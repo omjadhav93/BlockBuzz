@@ -6,7 +6,7 @@ import { VolunteerRole, VenueType } from "@/prisma/generated/enums";
 
 // Zod schema for event save validation
 const eventSaveSchema = z.object({
-    id: z.string().uuid().optional(), // Optional, used for updates
+    id: z.string().uuid().optional().nullable(), // Optional, used for updates
     title: z
         .string()
         .min(3, { message: "Title must be at least 3 characters long" })
@@ -14,7 +14,7 @@ const eventSaveSchema = z.object({
     description: z
         .string()
         .max(5000, { message: "Description must not exceed 5000 characters" })
-        .min(100, { message: "Description must not be less than 100 characters" })
+        .min(10, { message: "Description must not be less than 100 characters" })
         .optional()
         .nullable(),
     city: z
@@ -74,7 +74,7 @@ const eventSaveSchema = z.object({
             other_role: z.string().min(2, { message: "Other role must not be less than 2 characters" }).optional().nullable(),
             requiredCount: z.number().int({ message: "Required count must be an integer" }).positive({ message: "Required count must be a positive number" }),
             skills: z.array(z.string().min(1, { message: "Skill must not be less than 1 characters" })).optional().default([]),
-            description: z.string().min(5, { message: "Description must not be less than 5 characters" }).optional().nullable(),
+            // description: z.string().min(5, { message: "Description must not be less than 5 characters" }).optional().nullable(),
         }))
         .optional()
         .default([]),
@@ -94,7 +94,7 @@ const eventSaveSchema = z.object({
 
 export async function POST(request: NextRequest) {
     try {
-        // Check authentication and get organizer ID
+        // Check authentication and get organizer I
         const { error, organizerId } = await getOrganizerId(request);
         if (error) return error;
 
@@ -103,6 +103,7 @@ export async function POST(request: NextRequest) {
 
         // Validate input using Zod
         const validationResult = eventSaveSchema.safeParse(body);
+        console.log("validation error", validationResult.error);
 
         if (!validationResult.success) {
             return NextResponse.json(
@@ -187,7 +188,7 @@ export async function POST(request: NextRequest) {
                             other_role: req.other_role,
                             requiredCount: req.requiredCount,
                             skills: req.skills,
-                            description: req.description,
+                            // description: req.description,
                         },
                         create: {
                             eventId: event.id,
@@ -195,7 +196,7 @@ export async function POST(request: NextRequest) {
                             other_role: req.other_role,
                             requiredCount: req.requiredCount,
                             skills: req.skills,
-                            description: req.description,
+                            // description: req.description,
                         }
                     });
                 }
@@ -256,7 +257,7 @@ export async function POST(request: NextRequest) {
                             other_role: req.other_role,
                             requiredCount: req.requiredCount,
                             skills: req.skills,
-                            description: req.description,
+                            // description: req.description,
                         },
                     });
                 }

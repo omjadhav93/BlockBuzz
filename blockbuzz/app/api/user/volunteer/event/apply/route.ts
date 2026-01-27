@@ -11,74 +11,87 @@ const volunteerAssignmentSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
-    const { error, volunteerId, verified } = await getVolunteerId(request);
-    const { error: organizerError, organizerId } = await getOrganizerId(request);
-    if (error) return error;
-    if (!verified) {
+    try {
+        const { error, volunteerId, verified } = await getVolunteerId(request);
+        const { error: organizerError, organizerId } = await getOrganizerId(request);
+        if (error) return error;
+
+        if (!verified) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: "Unauthorized",
+                    message: "You must be verified to apply for events",
+                },
+                { status: 401 }
+            );
+        }
+
+        const body = await request.json();
+        const { eventId, role, other_role } = volunteerAssignmentSchema.parse(body);
+        if (!eventId) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: "Missing event ID",
+                    message: "Event ID is required",
+                },
+                { status: 400 }
+            );
+        }
+
+        const event = await prisma.event.findUnique({
+            where: { id: eventId },
+        });
+        if (!event) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: "Event not found",
+                    message: "Event not found",
+                },
+                { status: 404 }
+            );
+        }
+
+        if (!organizerError && event.organizerId === organizerId) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: "You can't apply for this event",
+                    message: "Why are you trying to apply for your own event?",
+                },
+                { status: 401 }
+            );
+        }
+
+        const assignment = await prisma.assignment.create({
+            data: {
+                volunteerId: volunteerId!,
+                eventId: eventId!,
+                role: role!,
+                other_role: other_role,
+                status: AssignmentStatus.APPLIED,
+            },
+        });
+
+        return NextResponse.json(
+            {
+                success: true,
+                message: "Event applied successfully",
+                assignment: assignment,
+            },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error("Error applying for event:", error);
         return NextResponse.json(
             {
                 success: false,
-                error: "Unauthorized",
-                message: "You must be verified to apply for events",
+                error: error,
+                message: "Internal server error",
             },
-            { status: 401 }
+            { status: 500 }
         );
     }
-
-    const body = await request.json();
-    const { eventId, role, other_role } = volunteerAssignmentSchema.parse(body);
-    if (!eventId) {
-        return NextResponse.json(
-            {
-                success: false,
-                error: "Missing event ID",
-                message: "Event ID is required",
-            },
-            { status: 400 }
-        );
-    }
-
-    const event = await prisma.event.findUnique({
-        where: { id: eventId },
-    });
-    if (!event) {
-        return NextResponse.json(
-            {
-                success: false,
-                error: "Event not found",
-                message: "Event not found",
-            },
-            { status: 404 }
-        );
-    }
-
-    if (!organizerError && event.organizerId === organizerId) {
-        return NextResponse.json(
-            {
-                success: false,
-                error: "You can't apply for this event",
-                message: "Why are you trying to apply for your own event?",
-            },
-            { status: 401 }
-        );
-    }
-
-    const assignment = await prisma.assignment.create({
-        data: {
-            volunteerId: volunteerId!,
-            eventId: eventId!,
-            role: role!,
-            other_role: other_role,
-            status: AssignmentStatus.APPLIED,
-        },
-    });
-
-    return NextResponse.json(
-        {
-            success: true,
-            message: "Event applied successfully",
-            assignment: assignment,
-        },
-        { status: 200 }
-    );
 }

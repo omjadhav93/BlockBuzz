@@ -10,11 +10,6 @@ export async function GET(request: NextRequest) {
         const events = await prisma.eventRegistration.findMany({
             where: {
                 userId: userId!,
-                event: {
-                    startTime: {
-                        gte: new Date()
-                    }
-                }
             },
             include: {
                 event: true

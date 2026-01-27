@@ -51,20 +51,20 @@ const fetcher = async (url: string): Promise<EventResponse> => {
 
 export default function EventPage() {
     const router = useRouter();
-    // const { data, isLoading, error } = useSWR("/api/user/events", fetcher);
+    const { data, isLoading, error } = useSWR("/api/user/events", fetcher);
 
-    const data = mockEventResponse;
+    // const data = mockEventResponse;
     const upcomingEvents = data?.events?.Upcoming || [];
     const pastEvents = data?.events?.Attended || [];
 
-    // if (isLoading) {
-    //     return (
-    //         <div className="min-h-screen flex flex-col items-center justify-center bg-[#FCFBFA]">
-    //             <Loader2 className="w-8 h-8 animate-spin text-[#EF835D] mb-2" />
-    //             <p className="text-slate-400 text-sm font-medium">Loading events...</p>
-    //         </div>
-    //     );
-    // }
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-[#FCFBFA]">
+                <Loader2 className="w-8 h-8 animate-spin text-[#EF835D] mb-2" />
+                <p className="text-slate-400 text-sm font-medium">Loading events...</p>
+            </div>
+        );
+    }
 
     // if (error) {
     //     return (
@@ -141,6 +141,7 @@ function EventCard({ event }: { event: EventData }) {
     const isPast = start < new Date();
     const isDraft = !event.published;
     const isCancelled = event.cancelled;
+    const router = useRouter();
 
     const getStatusUI = () => {
         if (isCancelled) return { label: "Cancelled", color: "text-red-500", bg: "bg-red-50", icon: <AlertCircle size={12} /> };
@@ -178,15 +179,13 @@ function EventCard({ event }: { event: EventData }) {
                 <DetailItem icon={<CheckCircle2 size={14} />} label={event.venue_type} />
             </div>
 
-            <Link href={`/events?role=${"User"}&eventId=${event.id}`}>
-                <div className="flex items-center gap-2 pt-4 border-t border-slate-50">
-                    <button className={`flex-1 py-4 rounded-2xl text-xs font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg ${isDraft ? "bg-amber-500 text-white shadow-amber-100" : "bg-slate-900 text-white shadow-slate-200"
-                        }`}>
-                        {isDraft ? "Complete Setup" : "Event Details"}
-                        <ArrowUpRight size={14} />
-                    </button>
-                </div>
-            </Link>
+            <div className="flex items-center gap-2 pt-4 border-t border-slate-50">
+                <button onClick={() => router.push(`/events?role=${"User"}&eventId=${event.id}`)} className={`flex-1 py-4 rounded-2xl text-xs font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg ${isDraft ? "bg-amber-500 text-white shadow-amber-100" : "bg-slate-900 text-white shadow-slate-200"
+                    }`}>
+                    {isDraft ? "Complete Setup" : "Event Details"}
+                    <ArrowUpRight size={14} />
+                </button>
+            </div>
         </div >
     );
 }

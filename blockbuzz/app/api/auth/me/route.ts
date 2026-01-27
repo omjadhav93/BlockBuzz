@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
                 id: userId!
             },
             select: {
+                id: true,
                 name: true,
                 email: true,
                 organizer: {
@@ -28,10 +29,11 @@ export async function GET(request: NextRequest) {
         })
 
         const formattedUser = {
+            id: user?.id,
             name: user?.name,
             email: user?.email,
-            isOrganizer: user?.organizer?.verified,
-            isVolunteer: user?.volunteer?.verified
+            isOrganizer: user?.organizer?.verified || false,
+            isVolunteer: user?.volunteer?.verified || false,
         }
 
         return NextResponse.json(

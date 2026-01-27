@@ -110,6 +110,8 @@ model Event {
   reports       Reports[]
 
   volunteerRequirements VolunteerRequirement[]
+
+  embedding Unsupported("vector")?
 }
 
 enum InteractionType {

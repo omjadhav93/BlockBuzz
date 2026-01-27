@@ -51,3 +51,10 @@ env/
 *.pyd
 .pytest_cache/
 .pyre/
+__pycache__
+
+
+# python
+.venv
+venv/
+__pycache__/

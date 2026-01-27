@@ -43,7 +43,7 @@ type UserDetails = {
 //     return Math.min(score, 1.0);
 // }
 
-export const fetchRecommendations = async (userId: UserDetails): Promise<Recommendation[]> => {
+export const fetchRecommendations = async (user: UserDetails): Promise<Recommendation[]> => {
     const events = await prisma.event.findMany({
         include: {
             organizer: true,
@@ -56,22 +56,23 @@ export const fetchRecommendations = async (userId: UserDetails): Promise<Recomme
             latitude: event.latitude,
             longitude: event.longitude,
             category: event.interests.map((interest) => interest.name),
-            start_time: event.startTime?.toDateString(),
-            host_score: event.organizer.host_score,
-            trust_score: event.organizer.trust_score
+            start_time: event.startTime?.toISOString() || new Date().toISOString(),
+            host_score: event.organizer.host_score || 0.0,
+            trust_score: event.organizer.trust_score || 0.0
         }
     }));
-    const recommendations = await fetch("http://localhost:8000/api/recommend", {
+    console.log(user);
+    const recommendations = await fetch("https://recommendation-model-dczc.onrender.com/api/recommend", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${userId}`,
+            "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            user: userId,
+            user,
             events: structuredEvents,
         })
     })
     const result = await recommendations.json();
+    console.log(result.results);
     return result.results;
 };
