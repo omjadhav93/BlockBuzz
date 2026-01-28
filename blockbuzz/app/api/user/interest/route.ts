@@ -39,9 +39,8 @@ export async function PATCH(request: NextRequest) {
     try {
         const { error, userId } = await getAuthUser(request);
         if (error) return error;
-        
+
         const { interests } = await request.json();
-        console.log("interests:", interests);
 
         // Validate that interests is an array
         if (!Array.isArray(interests)) {
@@ -64,7 +63,7 @@ export async function PATCH(request: NextRequest) {
                 data: {
                     interests: {
                         set: [],
-                        connect: interests,
+                        connect: interests.map((interest) => ({ id: interest })),
                     },
                 },
                 include: {
