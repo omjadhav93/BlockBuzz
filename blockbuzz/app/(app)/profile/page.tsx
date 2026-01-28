@@ -15,7 +15,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import router from "next/router";
+import { useRouter } from "next/navigation";
+import { useUserStore } from "@/app/store/user.store";
 
 /* ---------------------------------- */
 /* Options                             */
@@ -58,13 +59,16 @@ const fetcher = async (url: string) => {
 /* ---------------------------------- */
 
 export default function ProfilePage() {
+
+    const router = useRouter();
+    const clearUser = useUserStore((state) => state.clearUser);
+
     const { data, error, isLoading, isValidating } = useSWR(
         "/api/user/profile",
         fetcher
     );
 
-    const user = data?.user;
-    console.log("profile", user);
+    const userData = data?.user;
 
     /* ---------------------------------- */
     /* Guards                             */
@@ -78,21 +82,13 @@ export default function ProfilePage() {
         );
     }
 
-    // if (error) {
-    //     return (
-    //         <div className="flex items-center justify-center h-[60vh] text-red-500">
-    //             Failed to load profile
-    //         </div>
-    //     );
-    // }
-
     /* ---------------------------------- */
     /* Derived data                       */
     /* ---------------------------------- */
 
     const stats = {
-        eventsJoined: user?._count?.registrations ?? 0,
-        eventsHosted: user?.organizer?.totalEvents ?? 0,
+        eventsJoined: userData?._count?.registrations ?? 0,
+        eventsHosted: userData?.organizer?.totalEvents ?? 0,
         trustScore: "80%",
     };
 
@@ -102,23 +98,27 @@ export default function ProfilePage() {
         { title: "Trust Score", value: stats.trustScore },
     ];
 
-    const isHost = Boolean(user?.organizer?.verified);
+    const isHost = Boolean(userData?.organizer?.verified);
 
     /* ---------------------------------- */
     /* Render                             */
     /* ---------------------------------- */
 
     const handleLogout = async () => {
-        const res = await fetch("/api/auth/logout", {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-        });
+        try {
+            const res = await fetch("/api/auth/logout", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+            });
 
-        if (!res.ok) throw new Error("Failed to logout");
+            if (!res.ok) throw new Error("Failed to logout");
 
-        localStorage.removeItem("profile-cache");
-        router.push("/SignIn");
+            clearUser();
+            router.push("/SignIn");
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
     }
 
     return (
@@ -152,11 +152,11 @@ export default function ProfilePage() {
 
                     <div className="flex-1">
                         <h1 className="text-xl font-bold text-[#2D3344]">
-                            {user?.name}
+                            {userData?.name}
                         </h1>
-                        <p className="text-sm text-slate-500">{user?.email}</p>
+                        <p className="text-sm text-slate-500">{userData?.email}</p>
 
-                        {user?.volunteer?.verified ? (
+                        {userData?.volunteer?.verified ? (
                             <div className="mt-2 flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-lg border border-blue-100 w-fit">
                                 <Shield size={12} strokeWidth={3} />
                                 <span className="text-[10px] font-bold uppercase">
