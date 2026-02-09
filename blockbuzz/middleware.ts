@@ -1,26 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_ROUTES = [
-    "/",
-    "/onboarding",
-    "/SignIn",
-];
+const PUBLIC_ROUTES = ["/", "/onboarding", "/SignIn"];
+const PUBLIC_API_ROUTES = ["/api/auth", "/api/user/me"];
 
-const PUBLIC_API_ROUTES = [
-    "/api/auth",
-    "/api/user/me",
+// ✅ Allowed frontend origins (important for prod)
+const ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "https://yourdomain.com",
 ];
 
 export function middleware(req: NextRequest) {
     const pathname = req.nextUrl.pathname;
+    const origin = req.headers.get("origin");
 
-    // 1️⃣ Next internals
+    // ---- Create response early so we can attach headers ----
+    const res = NextResponse.next();
+
+    // ================= CORS HEADERS =================
+    if (origin && ALLOWED_ORIGINS.includes(origin)) {
+        res.headers.set("Access-Control-Allow-Origin", origin);
+    }
+
+    res.headers.set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    res.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.headers.set("Access-Control-Allow-Credentials", "true");
+
+    // Handle Preflight requests
+    if (req.method === "OPTIONS") {
+        return new NextResponse(null, { status: 204, headers: res.headers });
+    }
+    // ===============================================
+
+    // 1️⃣ Skip Next.js internals
     if (
         pathname.startsWith("/_next") ||
         pathname.startsWith("/favicon") ||
         pathname.startsWith("/assets")
     ) {
-        return NextResponse.next();
+        return res;
     }
 
     const authToken = req.cookies.get("token")?.value;
@@ -30,24 +47,24 @@ export function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL("/homepage", req.url));
     }
 
-    // 3️⃣ Allow public routes
+    // 3️⃣ Allow public pages
     if (PUBLIC_ROUTES.includes(pathname)) {
-        return NextResponse.next();
+        return res;
     }
 
     // 4️⃣ Allow public APIs
     if (PUBLIC_API_ROUTES.some((route) => pathname.startsWith(route))) {
-        return NextResponse.next();
+        return res;
     }
 
-    // 5️⃣ Block protected routes
+    // 5️⃣ Protect everything else
     if (!authToken) {
         const loginUrl = new URL("/SignIn", req.url);
         loginUrl.searchParams.set("from", pathname);
         return NextResponse.redirect(loginUrl);
     }
 
-    return NextResponse.next();
+    return res;
 }
 
 export const config = {
