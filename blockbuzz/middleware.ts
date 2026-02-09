@@ -5,8 +5,9 @@ const PUBLIC_API_ROUTES = ["/api/auth", "/api/user/me"];
 
 // ✅ Allowed frontend origins (important for prod)
 const ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "https://yourdomain.com",
+    'capacitor://localhost',      // iOS
+    'https://localhost',           // Android
+    'http://localhost:3000',
 ];
 
 export function middleware(req: NextRequest) {
