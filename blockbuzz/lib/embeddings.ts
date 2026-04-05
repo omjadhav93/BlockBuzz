@@ -1,6 +1,11 @@
 const HF_API_URL =
   "https://router.huggingface.co/hf-inference/models/intfloat/e5-small-v2";
 
+const headers = {
+  Authorization: `Bearer ${process.env.HF_API_KEY}`,
+  "Content-Type": "application/json",
+}
+
 export async function getEmbedding(text: string): Promise<number[]> {
   const res = await fetch(HF_API_URL, {
     method: "POST",
