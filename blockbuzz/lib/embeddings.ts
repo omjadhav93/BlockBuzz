@@ -1,18 +1,12 @@
 const HF_API_URL =
-  "https://api-inference.huggingface.co/pipeline/feature-extraction/Xenova/all-MiniLM-L6-v2";
-
-const headers = {
-  Authorization: `Bearer ${process.env.HF_API_KEY}`,
-  "Content-Type": "application/json",
-};
+  "https://router.huggingface.co/hf-inference/models/intfloat/e5-small-v2";
 
 export async function getEmbedding(text: string): Promise<number[]> {
   const res = await fetch(HF_API_URL, {
     method: "POST",
     headers,
     body: JSON.stringify({
-      inputs: text,
-      options: { wait_for_model: true },
+      inputs: `passage: ${text}`,
     }),
   });
 
@@ -22,9 +16,7 @@ export async function getEmbedding(text: string): Promise<number[]> {
 
   const data = await res.json();
 
-  // HF returns: number[][] (token embeddings)
-  const embedding = meanPooling(data);
-  return normalize(embedding);
+  return normalize(data);
 }
 
 function meanPooling(vectors: number[][]): number[] {
