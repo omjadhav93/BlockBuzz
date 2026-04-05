@@ -8,7 +8,6 @@ The project consists of several key components working together:
 
 *   **Next.js Application**: The core web application built with Next.js 16, serving the frontend and API routes.
 *   **Recommendation System**: A Python-based service (FastAPI) that powers the event recommendation engine, utilizing collaborative filtering and popularity-based algorithms.
-*   **Incident Intelligence Service**: A dedicated service for detecting and scoring event-related incidents, analyzing risk profiles for venues and hosts.
 *   **Auto Data Loading**: A set of Python scripts designed to populate the database with synthetic data for testing and development purposes.
 
 ## File System Structure
@@ -19,8 +18,6 @@ A brief overview of the project structure:
 *   `recommendation_system/`: The Python FastAPI service responsible for generating event recommendations.
     *   `app/main.py`: Entry point for the recommendation service.
     *   `learning/`: Contains logic for model training and scoring.
-*   `incident-intelligence-service/`: The Python service for incident detection and risk analysis.
-    *   `app/main.py`: Entry point for the incident intelligence service.
 *   `auto_data_loading/`: Scripts for generating and loading dummy data into the database.
     *   `main.py`: Master script to run all data loading modules.
 *   `prisma/`: Database schema (`schema.prisma`) and migrations.
