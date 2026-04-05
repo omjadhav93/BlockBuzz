@@ -96,7 +96,7 @@ export default function CreateEventPage() {
     /* ---------------- INTERESTS ---------------- */
 
     const { data, isLoading } = useSWR(
-        "/api/admin/interest",
+        `${process.env.NEXT_PUBLIC_API_BASE}api/admin/interest`,
         fetcher,
         {
             revalidateOnFocus: false,
@@ -126,7 +126,7 @@ export default function CreateEventPage() {
                         : null,
             };
 
-            const res = await fetch("/api/organizer/event/save", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}api/organizer/event/save`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
@@ -144,7 +144,7 @@ export default function CreateEventPage() {
 
         setIsSaving(true);
         try {
-            await fetch("/api/organizer/event/publish", {
+            await fetch(`${process.env.NEXT_PUBLIC_API_BASE}api/organizer/event/publish`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),

@@ -46,7 +46,7 @@ export default function AddInterest() {
 
     /* ---------------- SWR ---------------- */
     const { data, isLoading } = useSWR(
-        "/api/admin/interest",
+        `${process.env.NEXT_PUBLIC_API_BASE}api/admin/interest`,
         fetcher,
         {
             fallbackData: { data: getCachedInterests() },
@@ -78,7 +78,7 @@ export default function AddInterest() {
         setError(null);
 
         try {
-            const res = await fetch("/api/user/interest", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}api/user/interest`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",

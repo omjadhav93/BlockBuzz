@@ -37,11 +37,12 @@ export default function Register() {
         }
 
         try {
-            const response = await fetch("/api/auth/register", {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}api/auth/register`, {
                 method: "POST",
                 headers: {
-                    contentTypes: "application/json",
+                    "Content-Type": "application/json",
                 },
+                credentials: "include",
                 body: JSON.stringify(userData)
             })
 
@@ -49,17 +50,20 @@ export default function Register() {
             if (data.success) {
                 setUserData(data.user);
                 router.push("/add-interest")
+            } else {
+                alert("Registration failed: " + (data.message || "Unknown error"));
             }
-        } catch (error) {
+        } catch (error: any) {
+            alert("Registration failed: " + (error.message || "Network error"));
             console.log(error)
         } finally {
             setLoading(false);
-            setUserData({
-                name: "",
-                email: "",
-                password: "",
-                location: "",
-            })
+            // setUserData({
+            //     name: "",
+            //     email: "",
+            //     password: "",
+            //     location: "",
+            // })
         }
     };
 

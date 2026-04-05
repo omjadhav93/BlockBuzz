@@ -64,7 +64,7 @@ export default function ProfilePage() {
     const clearUser = useUserStore((state) => state.clearUser);
 
     const { data, error, isLoading, isValidating } = useSWR(
-        "/api/user/profile",
+        `${process.env.NEXT_PUBLIC_API_BASE}api/user/profile`,
         fetcher
     );
 
@@ -106,7 +106,7 @@ export default function ProfilePage() {
 
     const handleLogout = async () => {
         try {
-            const res = await fetch("/api/auth/logout", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}api/auth/logout`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

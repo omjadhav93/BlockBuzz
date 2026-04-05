@@ -43,7 +43,7 @@ export default function MapPage() {
 
     const swrKey =
         radius && center
-            ? `/api/event/nearby?lat=${center.lat}&long=${center.lng}&radius=${radius.toFixed(
+            ? `${process.env.NEXT_PUBLIC_API_BASE}api/event/nearby?lat=${center.lat}&long=${center.lng}&radius=${radius.toFixed(
                 50
             )}`
             : null;

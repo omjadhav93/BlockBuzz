@@ -54,7 +54,7 @@ function EventDetailContent() {
     const [loadingApply, setLoadingApply] = useState(false);
 
     const { data, isLoading } = useSWR(
-        `/api/event/view?eventId=${eventId}&role=${role}`,
+        `${process.env.NEXT_PUBLIC_API_BASE}api/event/view?eventId=${eventId}&role=${role}`,
         fetcher
     );
 
@@ -62,7 +62,7 @@ function EventDetailContent() {
     const requirements = event?.requirement;
 
     const { data: VolunteerData, isLoading: VolunteerLoading } = useSWR(
-        role === "Organizer" ? `/api/organizer/event/applications?eventId=${eventId}` : null,
+        role === "Organizer" ? `${process.env.NEXT_PUBLIC_API_BASE}api/organizer/event/applications?eventId=${eventId}` : null,
         fetcher
     );
     const volunteerData = VolunteerData?.applications?.accepted || [];
@@ -80,7 +80,7 @@ function EventDetailContent() {
 
     const handleVolunteerRequest = async (volunteerId: string, action: string) => {
         try {
-            const response = await fetch(`/api/organizer/event/applications`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}api/organizer/event/applications`, {
                 method: "POST",
                 credentials: "include",
                 headers: {
@@ -106,7 +106,7 @@ function EventDetailContent() {
 
     const handleRegisterAsAttendee = async () => {
         try {
-            const res = await fetch(`/api/event/register`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}api/event/register`, {
                 method: "POST",
                 credentials: "include",
                 headers: {
@@ -132,7 +132,7 @@ function EventDetailContent() {
     const handleRegisterAsVolunteer = async () => {
         setLoadingApply(true);
         try {
-            const res = await fetch(`/api/user/volunteer/event/apply`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}api/user/volunteer/event/apply`, {
                 method: "POST",
                 credentials: "include",
                 headers: {

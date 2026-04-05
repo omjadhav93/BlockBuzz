@@ -29,7 +29,7 @@ export default function HostPage() {
     const router = useRouter();
     const { user } = useUserStore();
     const isHost = user?.isOrganizer;
-    const { data, isLoading } = useSWR("/api/organizer/event/list", fetcher);
+    const { data, isLoading } = useSWR(`${process.env.NEXT_PUBLIC_API_BASE}api/organizer/event/list`, fetcher);
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState<TabType>("upcoming");
     // Replace with actual logic if needed
@@ -55,7 +55,7 @@ export default function HostPage() {
     const becomeHost = async () => {
         try {
             setLoading(true);
-            const res = await fetch("/api/organizer/request", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}api/organizer/request`, {
                 method: "POST",
                 credentials: "include",
             });

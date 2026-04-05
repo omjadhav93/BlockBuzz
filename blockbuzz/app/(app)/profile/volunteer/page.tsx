@@ -99,7 +99,7 @@ export default function VolunteerPage() {
         data,
         isLoading: isVolunteerLoading,
     } = useSWR(
-        isVolunteer ? "/api/user/volunteer" : null,
+        isVolunteer ? `${process.env.NEXT_PUBLIC_API_BASE}api/user/volunteer` : null,
         fetcher
     );
 
@@ -115,7 +115,7 @@ export default function VolunteerPage() {
     const beVolunteer = async () => {
         try {
             setLoading(true);
-            const res = await fetch("/api/admin/volunteer", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}api/admin/volunteer`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

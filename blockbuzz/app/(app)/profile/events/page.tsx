@@ -51,7 +51,7 @@ const fetcher = async (url: string): Promise<EventResponse> => {
 
 export default function EventPage() {
     const router = useRouter();
-    const { data, isLoading, error } = useSWR("/api/user/events", fetcher);
+    const { data, isLoading, error } = useSWR(`${process.env.NEXT_PUBLIC_API_BASE}api/user/events`, fetcher);
 
     // const data = mockEventResponse;
     const upcomingEvents = data?.events?.Upcoming || [];

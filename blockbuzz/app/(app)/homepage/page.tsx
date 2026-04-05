@@ -42,7 +42,7 @@ export default function HomePage() {
 
     /* ---------------- DATA ---------------- */
     const { data } = useSWR(
-        `/api/event/nearby?lat=${center.lat}&long=${center.lng}&radius=${radius}`,
+        `${process.env.NEXT_PUBLIC_API_BASE}api/event/nearby?lat=${center.lat}&long=${center.lng}&radius=${radius}`,
         fetcher
     );
 
@@ -51,7 +51,7 @@ export default function HomePage() {
     const [recommendLoading, setRecommendLoading] = useState<boolean>(false);
 
     const { data: searchData, isLoading: searching } = useSWR(
-        debouncedSearch ? `/api/event/search?q=${debouncedSearch}` : null,
+        debouncedSearch ? `${process.env.NEXT_PUBLIC_API_BASE}api/event/search?q=${debouncedSearch}` : null,
         fetcher
     );
 
@@ -80,7 +80,7 @@ export default function HomePage() {
         const getRecommandations = async () => {
             try {
                 setRecommendLoading(true);
-                const response = await fetch("/api/event/recommend", {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}api/event/recommend`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

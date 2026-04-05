@@ -37,11 +37,12 @@ export default function Login() {
         }
 
         try {
-            const response = await fetch("/api/auth/login", {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}api/auth/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
+                credentials: "include",
                 body: JSON.stringify(user)
             })
 
@@ -50,15 +51,19 @@ export default function Login() {
             if (data.success) {
                 setUserData(data.user);
                 router.push("/homepage");
+            } else {
+                alert("Login failed: " + (data.message || "Invalid credentials"));
             }
-        } catch (error) {
-
+        } catch (error: any) {
+            alert("Login failed: " + (error.message || "Unknown error"));
+            console.error(error);
         } finally {
             setLoading(false);
-            setUser({
-                email: "",
-                password: ""
-            })
+            // Don't clear form on failure to allow retry
+            // setUser({
+            //    email: "",
+            //    password: ""
+            // })
         }
 
     }

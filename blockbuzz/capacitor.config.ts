@@ -7,7 +7,7 @@ const config: CapacitorConfig = {
   server: {
     // For development - connect to local Next.js server
     // Comment out url for production build
-    url: process.env.CAPACITOR_SERVER_URL || 'http://localhost:3000',
+    // url: process.env.CAPACITOR_SERVER_URL || 'http://localhost:3000',
     cleartext: true, // Allow HTTP for local development
     androidScheme: 'https',
     iosScheme: 'https',

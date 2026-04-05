@@ -13,7 +13,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const checkMe = async () => {
             try {
-                const res = await fetch("/api/auth/me", {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}api/auth/me`, {
                     credentials: "include",
                 });
 
@@ -23,7 +23,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
                 const { user } = await res.json();
                 setUser(user);
-            } catch {
+            } catch (error) {
+                console.error("Auth check failed", error);
                 clearUser();
             } finally {
                 markHydrated();
