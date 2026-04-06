@@ -34,5 +34,5 @@ ios/
 *.sw?
 
 # Utility / one-off scripts (not part of the production app)
-lib/generate_embeddings.py
-lib/generate_embeddings.ts
+/lib/generate_embeddings.py
+/lib/generate_embeddings.ts
