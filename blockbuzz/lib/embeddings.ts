@@ -1,30 +1,15 @@
-const HF_API_URL =
-  "https://api-inference.huggingface.co/pipeline/feature-extraction/Xenova/all-MiniLM-L6-v2";
+import { HfInference } from "@huggingface/inference";
 
-const headers = {
-  Authorization: `Bearer ${process.env.HF_API_KEY}`,
-  "Content-Type": "application/json",
-};
+const hf = new HfInference(process.env.HF_API_KEY);
 
 export async function getEmbedding(text: string): Promise<number[]> {
-  const res = await fetch(HF_API_URL, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({
-      inputs: text,
-      options: { wait_for_model: true },
-    }),
+  const result = await hf.featureExtraction({
+    model: "intfloat/e5-small-v2",
+    inputs: `passage: ${text}`,
   });
 
-  if (!res.ok) {
-    throw new Error(`HF API error: ${await res.text()}`);
-  }
-
-  const data = await res.json();
-
-  // HF returns: number[][] (token embeddings)
-  const embedding = meanPooling(data);
-  return normalize(embedding);
+  // featureExtraction returns arrays. Usually 1D array of floats for a single string.
+  return normalize(result as unknown as number[]);
 }
 
 function meanPooling(vectors: number[][]): number[] {
@@ -48,4 +33,3 @@ function normalize(vec: number[]): number[] {
   const norm = Math.sqrt(vec.reduce((s, v) => s + v * v, 0));
   return vec.map(v => v / norm);
 }
-

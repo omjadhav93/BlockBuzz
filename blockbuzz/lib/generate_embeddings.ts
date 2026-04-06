@@ -1,5 +1,5 @@
-import { prisma } from "../prisma/db.js";
-import { getEmbedding } from "./embeddings.js";
+import { prisma } from "../prisma/db.ts";
+import { getEmbedding } from "./embeddings.ts";
 
 async function run() {
   console.log("🔄 Fetching events without embeddings...");
