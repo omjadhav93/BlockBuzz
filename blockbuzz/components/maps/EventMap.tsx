@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Circle, useMap, useMapEvents, Tooltip, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents, Tooltip } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import "@/app/globals.css";
@@ -75,15 +75,6 @@ const eventIcon = L.divIcon({
 });
 
 
-function RecenterMap({ location }: { location: { lat: number; lng: number } }) {
-    const map = useMap();
-    useEffect(() => {
-        if (!location) return;
-        map.invalidateSize();
-        map.setView([location.lat, location.lng], 13, { animate: true });
-    }, [location, map]);
-    return null;
-}
 
 export default function EventsMap({
     location,
@@ -103,6 +94,7 @@ export default function EventsMap({
         <MapContainer
             center={[location.lat, location.lng]}
             zoom={13}
+            scrollWheelZoom={true}
             style={{ height: "100%", width: "100%" }}
         >
             <TileLayer
@@ -110,7 +102,6 @@ export default function EventsMap({
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            <RecenterMap location={location} />
 
             {/* Map Event Listener for radius calculation */}
             {onRadiusChange && onCenterChange && (

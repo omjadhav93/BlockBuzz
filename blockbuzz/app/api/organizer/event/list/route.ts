@@ -29,19 +29,34 @@ export async function GET(request: NextRequest) {
                 cancelled: true,
                 cancelledAt: true,
                 cancellationReason: true,
+                createdAt: true,
                 interests: {
                     select: {
                         id: true,
                         name: true,
                     }
-                }
+                },
+                registrations: true
+            }
+        });
+
+        const tempEvents = events.map((event) => {
+            return {
+                ...event,
+                registrations: event.registrations.length,
             }
         });
 
         const formattedEvents = {
-            "Upcoming": events.filter((event) => event.published && event.startTime! > new Date()),
-            "Past": events.filter((event) => event.published && event.startTime! < new Date()),
-            "Draft": events.filter((event) => !event.published),
+            "Upcoming": tempEvents
+                .filter((event) => event.published && event.startTime != null && event.startTime > new Date())
+                .sort((a, b) => a.startTime!.getTime() - b.startTime!.getTime()),
+            "Past": tempEvents
+                .filter((event) => event.published && event.startTime != null && event.startTime < new Date())
+                .sort((a, b) => b.startTime!.getTime() - a.startTime!.getTime()),
+            "Drafts": tempEvents
+                .filter((event) => !event.published)
+                .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
         }
 
         return NextResponse.json({

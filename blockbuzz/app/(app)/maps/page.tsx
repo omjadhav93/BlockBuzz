@@ -51,7 +51,11 @@ export default function MapPage() {
     const { data, isLoading, error } = useSWR(swrKey, fetcher, {
         revalidateOnFocus: false,
         dedupingInterval: 30_000, // 30s cache
+        keepPreviousData: true,   // keep stale data while re-fetching so the map stays mounted
     });
+
+    // isInitialLoad: true only when we have NO data at all yet
+    const isInitialLoad = isLoading && !data;
 
     const events: Event[] = data?.events || [];
 
@@ -76,25 +80,35 @@ export default function MapPage() {
             {/* Map */}
             <main className="flex-grow relative z-10 mt-20">
                 <LocationGuard>
-                    {isLoading ? (
+                    {/* Show spinner only on the very first load (no data yet) */}
+                    {isInitialLoad ? (
                         <div className="flex flex-col items-center justify-center h-[60vh]">
                             <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
                             <p className="mt-4 text-slate-500 font-medium">
                                 Loading nearby events…
                             </p>
                         </div>
-                    ) : error ? (
+                    ) : error && !data ? (
                         <div className="flex justify-center items-center h-[60vh] text-red-500">
                             Failed to load events
                         </div>
                     ) : (
-                        <div className="h-[calc(100vh-64px)] w-full">
+                        /* Keep map mounted permanently — unmounting mid-scroll destroys
+                           the Leaflet DOM pane and causes the _leaflet_pos TypeError */
+                        <div className="h-[calc(100vh-64px)] w-full relative">
                             <EventsMap
                                 location={location}
                                 events={events}
                                 onRadiusChange={setRadius}
                                 onCenterChange={setCenter}
                             />
+                            {/* Subtle re-fetch indicator — no unmount, just an overlay */}
+                            {isLoading && (
+                                <div className="absolute top-3 right-3 z-[1000] bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-2 shadow text-xs text-slate-500 font-medium">
+                                    <div className="w-3 h-3 border-2 border-blue-400/30 border-t-blue-500 rounded-full animate-spin" />
+                                    Refreshing…
+                                </div>
+                            )}
                         </div>
                     )}
                 </LocationGuard>

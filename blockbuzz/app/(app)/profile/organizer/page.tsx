@@ -41,6 +41,7 @@ export default function HostPage() {
     };
 
     const filteredEvents = useMemo(() => {
+        console.log(events);
         if (activeTab === "upcoming") return events.Upcoming ?? [];
         if (activeTab === "past") return events.Past ?? [];
         if (activeTab === "drafts") return events.Drafts ?? [];
@@ -188,9 +189,9 @@ function EventCard({ event, activeTab }: { event: any; activeTab: TabType }) {
     const month = startDate.toLocaleString("en-US", { month: "short" });
 
     // Mocking progress - replace with actual counts if available in API
-    const volunteerCount = event._count?.registrations ?? 0;
+    const attendees = event.registrations || 0;
     const capacity = event.capacity || 1;
-    const progress = Math.min((volunteerCount / capacity) * 100, 100);
+    const progress = Math.min((attendees / capacity) * 100, 100);
 
     return (
         <div className="bg-white p-5 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all group">
@@ -233,7 +234,7 @@ function EventCard({ event, activeTab }: { event: any; activeTab: TabType }) {
                         <div className="flex items-center gap-1.5">
                             <Users size={14} className="text-[#EF835D]" />
                             <span className="text-[11px] font-bold text-slate-600">
-                                {volunteerCount} / {capacity} Registered
+                                {attendees} / {capacity} Registered
                             </span>
                         </div>
                         <span className="text-[10px] font-black text-[#EF835D]">
