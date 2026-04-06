@@ -1,10 +1,10 @@
 import type { NextConfig } from "next";
 
+// ✅ Web / Server config (used for development and Vercel deployment)
+// For Capacitor mobile builds, use: npm run cap:build
+// which temporarily swaps to next.config.capacitor.ts
 const nextConfig: NextConfig = {
-    output: "export", // Required for Capacitor
-    trailingSlash: true, // Better for Capacitor routing
     images: {
-        unoptimized: true, // Required for static export
         remotePatterns: [
             {
                 protocol: 'https',
@@ -16,8 +16,6 @@ const nextConfig: NextConfig = {
             },
         ],
     },
-    // Disable API routes for static export
-    // Your API should run on a separate server
 };
 
 export default nextConfig;

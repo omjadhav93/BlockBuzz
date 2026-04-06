@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Plain Node.js CJS scripts (not TypeScript / Next.js)
+    "build-capacitor.js",
+    "replace_api.cjs",
   ]),
 ]);
 

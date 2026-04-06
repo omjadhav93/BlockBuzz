@@ -5,12 +5,14 @@ const PUBLIC_API_ROUTES = ["/api/auth", "/api/user/me"];
 
 // ✅ Allowed frontend origins (important for prod)
 const ALLOWED_ORIGINS = [
-    'capacitor://localhost',      // iOS
-    'https://localhost',           // Android
-    'http://localhost:3000',
+    'capacitor://localhost',       // Capacitor iOS
+    'https://localhost',            // Capacitor Android
+    'http://localhost:3000',        // Next.js dev
+    'http://localhost:3001',        // Next.js dev (alt port)
+    'https://block-buzz-sandy.vercel.app', // Production
 ];
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
     const pathname = req.nextUrl.pathname;
     const origin = req.headers.get("origin");
 

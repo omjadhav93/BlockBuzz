@@ -4,15 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate --schema=./prisma/schema.prisma && next build",
+    "build:web": "prisma generate --schema=./prisma/schema.prisma && next build",
     "start": "next start",
     "lint": "eslint",
-    "cap:build": "./build-capacitor.sh",
-    "cap:sync": "bunx cap sync",
-    "cap:open:android": "bunx cap open android",
-    "cap:open:ios": "bunx cap open ios",
-    "cap:run:android": "bunx cap run android",
-    "cap:run:ios": "bunx cap run ios"
+    "cap:build": "node build-capacitor.js",
+    "cap:sync": "npx cap sync",
+    "cap:open:android": "npx cap open android",
+    "cap:open:ios": "npx cap open ios",
+    "cap:run:android": "npx cap run android",
+    "cap:run:ios": "npx cap run ios"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",
